@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy[asyncio]
+asyncpg
+alembic
+structlog
+pydantic
+pydantic-settings
