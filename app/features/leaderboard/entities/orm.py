@@ -10,11 +10,9 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
-class Base(DeclarativeBase):
-    pass
+from app.core.orm_config import Base
 
 
 class Leaderboard(Base):
@@ -28,6 +26,9 @@ class Leaderboard(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    snapshots: Mapped[list["LeaderboardSnapshot"]] = relationship(
+        back_populates="leaderboard"
+    )
 
 
 class LeaderboardSnapshot(Base):
@@ -40,6 +41,8 @@ class LeaderboardSnapshot(Base):
     fetched_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    leaderboard: Mapped["Leaderboard"] = relationship(back_populates="snapshots")
+    entries: Mapped[list["LeaderboardEntry"]] = relationship(back_populates="snapshot")
 
 
 class LeaderboardEntry(Base):
@@ -57,3 +60,5 @@ class LeaderboardEntry(Base):
     )
     rank: Mapped[int] = mapped_column(Integer, nullable=False)
     player_name: Mapped[str] = mapped_column(Text, nullable=False)
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
+    snapshot: Mapped["LeaderboardSnapshot"] = relationship(back_populates="entries")
