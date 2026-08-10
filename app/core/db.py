@@ -22,16 +22,16 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 class UnitOfWork:
-    __session: AsyncSession
+    _session: AsyncSession
 
     def __init__(self, session: AsyncSession) -> None:
-        self.__session = session
+        self._session = session
 
     async def commit(self) -> None:
-        await self.__session.commit()
+        await self._session.commit()
 
     async def rollback(self) -> None:
-        await self.__session.rollback()
+        await self._session.rollback()
 
 
 async def get_unit_of_work(session: AsyncSession = Depends(get_db)) -> UnitOfWork:  # noqa: B008

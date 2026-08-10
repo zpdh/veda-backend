@@ -1,5 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import cast
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+from app.core.dto import ErrorResponse
 
 
 @dataclass(frozen=True)
@@ -27,3 +33,23 @@ class AppError(Exception):
         self.details = details
 
         super().__init__(message)
+
+
+async def app_error_handler(req: Request, exc: Exception) -> JSONResponse:
+    exc = cast(AppError, exc)
+    res = ErrorResponse(
+        errorCode=exc.error_code, message=exc.message, details=exc.details
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code, content=res.model_dump(mode="json")
+    )
+
+
+async def error_handler(req: Request, exc: Exception) -> JSONResponse:
+    err_desc: ErrorDescription = CommonErrors.INTERNAL_SERVER_ERROR.value
+    res = ErrorResponse(errorCode=err_desc.error_code, message="Internal Server Error.")
+
+    return JSONResponse(
+        status_code=err_desc.status_code, content=res.model_dump(mode="json")
+    )
