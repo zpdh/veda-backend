@@ -1,7 +1,8 @@
 from datetime import UTC, datetime, timedelta
 
 from fastapi import Depends
-from sqlalchemy import delete, select
+from sqlalchemy import delete, insert, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -10,16 +11,39 @@ from app.features.leaderboard.entities.orm import Leaderboard, LeaderboardSnapsh
 
 
 class LeaderboardRepository:
-    __session: AsyncSession
+    _session: AsyncSession
 
     def __init__(self, session: AsyncSession) -> None:
-        self.__session = session
+        self._session = session
 
     async def get_leaderboard_by_name(self, name: str) -> Leaderboard | None:
         query = select(Leaderboard).where(Leaderboard.name == name)
-        result = await self.__session.execute(query)
+        result = await self._session.execute(query)
 
         return result.scalar_one_or_none()
+
+    async def upsert_leaderboard(self, name: str) -> Leaderboard:
+        lb = await self.get_leaderboard_by_name(name)
+        if lb:
+            return lb
+
+        command = (
+            pg_insert(Leaderboard)
+            .values(name=name)
+            .on_conflict_do_nothing(index_elements=["name"])
+            .returning(Leaderboard)
+        )
+
+        result = await self._session.execute(command)
+
+        lb = result.scalar_one_or_none()
+        if lb:
+            return lb
+
+        lb = await self.get_leaderboard_by_name(name)
+        assert lb is not None, "leaderboard still missing after race resolution"
+
+        return lb
 
     async def get_latest_snapshot(
         self, leaderboard_id: int
@@ -31,16 +55,16 @@ class LeaderboardRepository:
             .order_by(LeaderboardSnapshot.fetched_at.desc())
             .limit(1)
         )
-        result = await self.__session.execute(query)
+        result = await self._session.execute(query)
 
         return result.scalar_one_or_none()
 
     async def create_snapshot(
         self, snapshot: LeaderboardSnapshot
     ) -> LeaderboardSnapshot:
-        self.__session.add(snapshot)
+        self._session.add(snapshot)
 
-        await self.__session.flush()
+        await self._session.flush()
 
         return snapshot
 
@@ -50,7 +74,7 @@ class LeaderboardRepository:
             LeaderboardSnapshot.fetched_at < cutoff_time
         )
 
-        await self.__session.execute(command)
+        await self._session.execute(command)
 
 
 async def get_leaderboard_repository(

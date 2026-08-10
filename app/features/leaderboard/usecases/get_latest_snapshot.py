@@ -9,16 +9,16 @@ from app.features.leaderboard.repositories.postgres import (
 
 
 class GetLatestSnapshot:
-    lb_repo: LeaderboardRepository
+    _lb_repo: LeaderboardRepository
 
     def __init__(
         self,
         lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),  # noqa: B008
     ) -> None:
-        self.lb_repo = lb_repo
+        self._lb_repo = lb_repo
 
     async def execute(self, leaderboard_name: str) -> SnapshotResponse:
-        leaderboard = await self.lb_repo.get_leaderboard_by_name(leaderboard_name)
+        leaderboard = await self._lb_repo.get_leaderboard_by_name(leaderboard_name)
 
         if leaderboard is None:
             raise LeaderboardError(
@@ -27,7 +27,7 @@ class GetLatestSnapshot:
                 {"leaderboardName": leaderboard_name},
             )
 
-        snapshot = await self.lb_repo.get_latest_snapshot(leaderboard.id)
+        snapshot = await self._lb_repo.get_latest_snapshot(leaderboard.id)
 
         if snapshot is None:
             raise LeaderboardError(
