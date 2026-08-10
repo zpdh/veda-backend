@@ -1,7 +1,10 @@
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.features.leaderboard.entities.orm import Leaderboard
+from app.core.db import get_db
+from app.features.leaderboard.entities.orm import Leaderboard, LeaderboardSnapshot
 
 
 class LeaderboardRepository:
@@ -16,15 +19,32 @@ class LeaderboardRepository:
 
         return result.scalar_one_or_none()
 
+    async def get_latest_snapshot(
+        self, leaderboard_id: int
+    ) -> LeaderboardSnapshot | None:
+        query = (
+            select(LeaderboardSnapshot)
+            .where(LeaderboardSnapshot.leaderboard_id == leaderboard_id)
+            .options(selectinload(LeaderboardSnapshot.entries))
+            .order_by(LeaderboardSnapshot.fetched_at.desc())
+            .limit(1)
+        )
+        result = await self.session.execute(query)
 
-class SnapshotRepository:
-    session: AsyncSession
+        return result.scalar_one_or_none()
 
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+    async def create_snapshot(
+        self, snapshot: LeaderboardSnapshot
+    ) -> LeaderboardSnapshot:
+        self.session.add(snapshot)
+        await self.session.flush()
 
-    async def get_latest_snapshot(self): ...
-
-    async def create_snapshot(self): ...
+        return snapshot
 
     async def delete_old_snapshots(self): ...
+
+
+async def get_leaderboard_repository(
+    session: AsyncSession = Depends(get_db),  # noqa: B008
+) -> LeaderboardRepository:
+    return LeaderboardRepository(session)
