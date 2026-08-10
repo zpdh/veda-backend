@@ -3,12 +3,8 @@ from enum import Enum
 from app.core.errors import AppError, ErrorDescription
 
 
-class LeaderboardErrorDescription(ErrorDescription):
-    pass
-
-
 class LeaderboardErrors(Enum):
-    DUPLICATE_RANK = LeaderboardErrorDescription(400, "ERR_DUPLICATE_RANK")
+    DUPLICATE_RANK = ErrorDescription(400, "ERR_DUPLICATE_RANK")
 
 
 class LeaderboardError(AppError):
