@@ -13,7 +13,7 @@ class GetLatestSnapshot:
 
     def __init__(
         self,
-        lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),  # noqa: B008
+        lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),
     ) -> None:
         self._lb_repo = lb_repo
 

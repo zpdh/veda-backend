@@ -5,7 +5,6 @@ from fastapi import Depends
 from app.core.db import UnitOfWork, get_unit_of_work
 from app.features.leaderboard.dto.request import (
     CreateSnapshotRequest,
-    LeaderboardSnapshotIn,
 )
 from app.features.leaderboard.dto.response import SnapshotCreatedResponse
 from app.features.leaderboard.entities.orm import LeaderboardEntry, LeaderboardSnapshot
@@ -21,8 +20,8 @@ class CreateSnapshot:
 
     def __init__(
         self,
-        uow: UnitOfWork = Depends(get_unit_of_work),  # noqa: B008
-        lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),  # noqa: B008
+        uow: UnitOfWork = Depends(get_unit_of_work),
+        lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),
     ) -> None:
         self._unit_of_work = uow
         self._lb_repo = lb_repo
