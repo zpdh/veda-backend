@@ -5,6 +5,8 @@ from app.core.errors import AppError, ErrorDescription
 
 class LeaderboardErrors(Enum):
     DUPLICATE_RANK = ErrorDescription(400, "ERR_DUPLICATE_RANK")
+    LEADERBOARD_NOT_FOUND = ErrorDescription(404, "ERR_LEADERBOARD_NOT_FOUND")
+    SNAPSHOT_NOT_FOUND = ErrorDescription(404, "ERR_SNAPSHOT_NOT_FOUND")
 
 
 class LeaderboardError(AppError):
