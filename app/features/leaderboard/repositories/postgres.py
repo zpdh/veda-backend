@@ -1,5 +1,7 @@
+from datetime import UTC, datetime, timedelta
+
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -37,11 +39,18 @@ class LeaderboardRepository:
         self, snapshot: LeaderboardSnapshot
     ) -> LeaderboardSnapshot:
         self.session.add(snapshot)
+
         await self.session.flush()
 
         return snapshot
 
-    async def delete_old_snapshots(self): ...
+    async def delete_old_snapshots(self, age_in_days: int = 7) -> None:
+        time_period = datetime.now(UTC) - timedelta(days=age_in_days)
+        command = delete(LeaderboardSnapshot).where(
+            LeaderboardSnapshot.fetched_at < time_period
+        )
+
+        await self.session.execute(command)
 
 
 async def get_leaderboard_repository(
