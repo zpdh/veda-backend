@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Security
 
+from app.core.security import verify_auth_token
 from app.features.leaderboard.dto.request import CreateSnapshotRequest
 from app.features.leaderboard.dto.response import (
     SnapshotCreatedResponse,
@@ -18,7 +19,9 @@ async def get_latest_snapshot(
     return await use_case.execute(leaderboard_name)
 
 
-@leaderboard_router.post("/snapshot", status_code=201)
+@leaderboard_router.post(
+    "/snapshot", status_code=201, dependencies=[Security(verify_auth_token)]
+)
 async def post_snapshot(
     req: CreateSnapshotRequest, use_case: CreateSnapshot = Depends()
 ) -> SnapshotCreatedResponse:

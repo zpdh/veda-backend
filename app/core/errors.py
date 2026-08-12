@@ -16,6 +16,7 @@ class ErrorDescription:
 
 class CommonErrors(Enum):
     INTERNAL_SERVER_ERROR = ErrorDescription(500, "ERR_INTERNAL")
+    UNAUTHORIZED = ErrorDescription(401, "ERR_UNAUTHORIZED")
 
 
 class AppError(Exception):
