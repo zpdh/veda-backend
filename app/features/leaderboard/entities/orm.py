@@ -12,7 +12,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.orm_config import Base
+from app.core.db.base import Base
 
 
 class Leaderboard(Base):

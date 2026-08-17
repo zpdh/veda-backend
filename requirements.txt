@@ -6,3 +6,4 @@ alembic
 structlog
 pydantic
 pydantic-settings
+slowapi

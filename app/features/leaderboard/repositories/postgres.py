@@ -1,12 +1,12 @@
 from datetime import UTC, datetime, timedelta
 
 from fastapi import Depends
-from sqlalchemy import delete, insert, select
+from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.db import get_db
+from app.core.db.session import get_db
 from app.features.leaderboard.entities.orm import Leaderboard, LeaderboardSnapshot
 
 
@@ -74,10 +74,10 @@ class LeaderboardRepository:
             LeaderboardSnapshot.fetched_at < cutoff_time
         )
 
-        await self._session.execute(command)
+        _ = await self._session.execute(command)
 
 
 async def get_leaderboard_repository(
-    session: AsyncSession = Depends(get_db),  # noqa: B008
+    session: AsyncSession = Depends(get_db),
 ) -> LeaderboardRepository:
     return LeaderboardRepository(session)

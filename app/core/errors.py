@@ -26,7 +26,10 @@ class AppError(Exception):
     details: dict | None
 
     def __init__(
-        self, error_desc: ErrorDescription, message: str, details: dict | None = None
+        self,
+        error_desc: ErrorDescription,
+        message: str,
+        details: dict | None = None,
     ) -> None:
         self.status_code = error_desc.status_code
         self.error_code = error_desc.error_code
@@ -36,7 +39,7 @@ class AppError(Exception):
         super().__init__(message)
 
 
-async def app_error_handler(req: Request, exc: Exception) -> JSONResponse:
+async def app_error_handler(reg: Request, exc: Exception) -> JSONResponse:  # pyright: ignore[reportUnusedParameter]
     exc = cast(AppError, exc)
     res = ErrorResponse(
         errorCode=exc.error_code, message=exc.message, details=exc.details
@@ -47,7 +50,7 @@ async def app_error_handler(req: Request, exc: Exception) -> JSONResponse:
     )
 
 
-async def error_handler(req: Request, exc: Exception) -> JSONResponse:
+async def error_handler(req: Request, exc: Exception) -> JSONResponse:  # pyright: ignore[reportUnusedParameter]
     err_desc: ErrorDescription = CommonErrors.INTERNAL_SERVER_ERROR.value
     res = ErrorResponse(errorCode=err_desc.error_code, message="Internal Server Error.")
 

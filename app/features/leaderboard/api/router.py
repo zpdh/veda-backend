@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Security
 
-from app.core.security import verify_auth_token
+from app.core.security.auth import verify_auth_token
 from app.features.leaderboard.dto.request import CreateSnapshotRequest
 from app.features.leaderboard.dto.response import (
     SnapshotCreatedResponse,

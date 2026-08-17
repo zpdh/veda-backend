@@ -7,7 +7,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import settings
-from app.core.orm_config import Base
+from app.core.db.base import Base
 
 # mapping imports
 from app.features.leaderboard.entities import (

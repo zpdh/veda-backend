@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from fastapi import Depends
 
-from app.core.db import UnitOfWork, get_unit_of_work
+from app.core.db.unit_of_work import UnitOfWork, get_unit_of_work
 from app.features.leaderboard.dto.request import (
     CreateSnapshotRequest,
 )
