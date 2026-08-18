@@ -7,3 +7,4 @@ structlog
 pydantic
 pydantic-settings
 slowapi
+redis

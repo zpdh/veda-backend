@@ -17,6 +17,7 @@ class ErrorDescription:
 class CommonErrors(Enum):
     INTERNAL_SERVER_ERROR = ErrorDescription(500, "ERR_INTERNAL")
     UNAUTHORIZED = ErrorDescription(401, "ERR_UNAUTHORIZED")
+    RATE_LIMIT = ErrorDescription(429, "ERR_RATE_LIMITED")
 
 
 class AppError(Exception):
@@ -39,7 +40,7 @@ class AppError(Exception):
         super().__init__(message)
 
 
-async def app_error_handler(reg: Request, exc: Exception) -> JSONResponse:  # pyright: ignore[reportUnusedParameter]
+async def app_error_handler(req: Request, exc: Exception) -> JSONResponse:  # pyright: ignore[reportUnusedParameter]
     exc = cast(AppError, exc)
     res = ErrorResponse(
         errorCode=exc.error_code, message=exc.message, details=exc.details
@@ -47,6 +48,15 @@ async def app_error_handler(reg: Request, exc: Exception) -> JSONResponse:  # py
 
     return JSONResponse(
         status_code=exc.status_code, content=res.model_dump(mode="json")
+    )
+
+
+async def rate_limit_handler(req: Request, exc: Exception) -> JSONResponse:
+    err_desc: ErrorDescription = CommonErrors.RATE_LIMIT.value
+    res = ErrorResponse(errorCode=err_desc.error_code, message="Rate limit exceeded.")
+
+    return JSONResponse(
+        status_code=err_desc.status_code, content=res.model_dump(mode="json")
     )
 
 
