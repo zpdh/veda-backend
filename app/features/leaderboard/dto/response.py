@@ -33,3 +33,11 @@ class SnapshotCreatedResponse(BaseModel):
     model_config = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )
+
+
+class LeaderboardNamesResponse(BaseModel):
+    leaderboard_names: list[str] = Field(alias="leaderboardNames")
+
+    model_config = ConfigDict(
+        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
+    )

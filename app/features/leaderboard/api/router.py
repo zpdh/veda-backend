@@ -4,20 +4,32 @@ from app.core.security.auth import verify_auth_token
 from app.core.security.rate_limiter import limiter
 from app.features.leaderboard.dto.request import CreateSnapshotRequest
 from app.features.leaderboard.dto.response import (
+    LeaderboardNamesResponse,
     SnapshotCreatedResponse,
     SnapshotResponse,
 )
 from app.features.leaderboard.use_cases.create_snapshot import CreateSnapshot
 from app.features.leaderboard.use_cases.get_latest_snapshot import GetLatestSnapshot
+from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboardNames
 
 leaderboard_router = APIRouter(prefix="/v1/api/leaderboards", tags=["leaderboards"])
 
+_LIMITER_VALUE_GET: str = "60/minute"
+_LIMITER_VALUE_POST: str = "5/minute"
+
+
+@leaderboard_router.get("")
+@limiter.limit(limit_value=_LIMITER_VALUE_GET)
+async def get_leaderboard_names(
+    request: Request, use_case: GetLeaderboardNames = Depends()
+) -> LeaderboardNamesResponse:
+    return await use_case.execute()
+
 
 @leaderboard_router.get("/{leaderboard_name}")
-@limiter.limit(limit_value="60/minute")
+@limiter.limit(limit_value=_LIMITER_VALUE_GET)
 async def get_latest_snapshot(
-    request: Request,
-    leaderboard_name: str, use_case: GetLatestSnapshot = Depends()
+    request: Request, leaderboard_name: str, use_case: GetLatestSnapshot = Depends()
 ) -> SnapshotResponse:
     return await use_case.execute(leaderboard_name)
 
@@ -25,9 +37,8 @@ async def get_latest_snapshot(
 @leaderboard_router.post(
     "/snapshot", status_code=201, dependencies=[Security(verify_auth_token)]
 )
-@limiter.limit(limit_value="5/minute")
+@limiter.limit(limit_value=_LIMITER_VALUE_POST)
 async def post_snapshot(
-    request: Request,
-    req: CreateSnapshotRequest, use_case: CreateSnapshot = Depends()
+    request: Request, req: CreateSnapshotRequest, use_case: CreateSnapshot = Depends()
 ) -> SnapshotCreatedResponse:
     return await use_case.execute(req)

@@ -24,6 +24,7 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 app.add_exception_handler(Exception, error_handler)

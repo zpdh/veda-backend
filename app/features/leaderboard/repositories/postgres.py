@@ -76,6 +76,12 @@ class LeaderboardRepository:
 
         _ = await self._session.execute(command)
 
+    async def get_leaderboards(self) -> list[Leaderboard]:
+        query = select(Leaderboard)
+        result = await self._session.execute(query)
+
+        return list(result.scalars().all())
+
 
 async def get_leaderboard_repository(
     session: AsyncSession = Depends(get_db),
