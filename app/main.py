@@ -17,10 +17,6 @@ app = FastAPI(title="Veda", version="1.0")
 
 app.state.limiter = rate_limiter.limiter
 
-app.add_exception_handler(AppError, app_error_handler)
-app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
-app.add_exception_handler(Exception, error_handler)
-
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -28,5 +24,9 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+app.add_exception_handler(AppError, app_error_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+app.add_exception_handler(Exception, error_handler)
+
 
 app.include_router(leaderboard_router)
