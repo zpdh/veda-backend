@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+from app.core.config import settings
 from app.core.errors import (
     AppError,
     app_error_handler,
@@ -20,5 +22,11 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 app.add_exception_handler(Exception, error_handler)
 
 app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_url],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 app.include_router(leaderboard_router)
