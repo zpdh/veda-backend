@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 from fastapi import Depends
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -17,7 +17,7 @@ class LeaderboardRepository:
         self._session = session
 
     async def get_leaderboard_by_name(self, name: str) -> Leaderboard | None:
-        query = select(Leaderboard).where(Leaderboard.name == name)
+        query = select(Leaderboard).where(func.lower(Leaderboard.name) == func.lower(name))
         result = await self._session.execute(query)
 
         return result.scalar_one_or_none()
