@@ -11,7 +11,7 @@ from app.core.errors import (
     rate_limit_handler,
 )
 from app.core.security import rate_limiter
-from app.features.leaderboard.api.router import leaderboard_router
+from app.features.leaderboard.api.router import leaderboard_router, config_router
 
 app = FastAPI(title="Veda", version="1.0")
 
@@ -31,3 +31,4 @@ app.add_exception_handler(Exception, error_handler)
 
 
 app.include_router(leaderboard_router)
+app.include_router(config_router)
