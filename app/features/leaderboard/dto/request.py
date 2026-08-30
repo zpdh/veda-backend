@@ -10,7 +10,7 @@ from app.features.leaderboard.errors.errors import (
 
 class EntryIn(BaseModel):
     rank: int = Field(gt=0)
-    player_name: str = Field(alias="playerName", min_length=1, max_length=16)
+    player_name: str = Field(alias="playerName", min_length=1, max_length=16, pattern=r"^[a-zA-Z0-9_]+$")
     value: int = Field(ge=0)
 
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
