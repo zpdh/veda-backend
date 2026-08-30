@@ -16,10 +16,12 @@ from app.core.errors import (
 from app.core.security import rate_limiter
 from app.features.leaderboard.api.router import leaderboard_router
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
     await close_redis()
+
 
 app = FastAPI(title="Veda", version="1.0")
 
