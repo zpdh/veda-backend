@@ -15,6 +15,7 @@ from app.core.errors import (
 )
 from app.core.security import rate_limiter
 from app.features.leaderboard.api.router import leaderboard_router
+from app.features.player.api.router import player_router
 
 
 @asynccontextmanager
@@ -41,3 +42,4 @@ app.add_exception_handler(Exception, error_handler)
 
 
 app.include_router(leaderboard_router)
+app.include_router(player_router)
