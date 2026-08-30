@@ -9,7 +9,6 @@ from app.features.leaderboard.repositories.postgres import (
 
 
 class GetLatestSnapshot:
-
     def __init__(
         self,
         lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),

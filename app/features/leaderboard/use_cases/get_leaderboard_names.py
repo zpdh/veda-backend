@@ -8,7 +8,6 @@ from app.features.leaderboard.repositories.postgres import (
 
 
 class GetLeaderboardNames:
-
     def __init__(
         self, lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository)
     ) -> None:
