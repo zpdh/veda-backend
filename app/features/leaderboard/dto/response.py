@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -9,7 +10,7 @@ class EntryOut(BaseModel):
     player_name: str = Field(alias="playerName")
     value: int
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )
 
@@ -20,7 +21,7 @@ class SnapshotResponse(BaseModel):
     fetched_at: datetime = Field(alias="fetchedAt")
     entries: list[EntryOut]
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )
 
@@ -30,7 +31,7 @@ class SnapshotCreatedResponse(BaseModel):
     fetched_at: datetime = Field(alias="fetchedAt")
     message: str
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )
 
@@ -38,6 +39,6 @@ class SnapshotCreatedResponse(BaseModel):
 class LeaderboardNamesResponse(BaseModel):
     leaderboard_names: list[str] = Field(alias="leaderboardNames")
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )

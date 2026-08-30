@@ -1,4 +1,5 @@
 from collections import Counter
+from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -13,14 +14,14 @@ class EntryIn(BaseModel):
     player_name: str = Field(alias="playerName", min_length=1, max_length=16, pattern=r"^[a-zA-Z0-9_]+$")
     value: int = Field(ge=0)
 
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
+    model_config: ClassVar[ConfigDict]  = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
 
 class LeaderboardSnapshotIn(BaseModel):
     leaderboard_name: str = Field(alias="leaderboardName", min_length=1, max_length=255)
     entries: list[EntryIn] = Field(alias="entries", min_length=1)
 
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
+    model_config: ClassVar[ConfigDict] = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     @field_validator("entries")
     @classmethod
