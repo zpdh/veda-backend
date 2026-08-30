@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
 from fastapi import Depends
-from sqlalchemy import distinct, func, select
+from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db.session import get_db
@@ -10,7 +11,6 @@ from app.features.leaderboard.entities.orm import (
     LeaderboardEntry,
     LeaderboardSnapshot,
 )
-from app.features.leaderboard.repositories.postgres import pg_insert
 from app.features.player.entities.orm import Player
 
 
@@ -22,10 +22,8 @@ class PlayerEntryRow:
 
 
 class PlayerRepository:
-    _session: AsyncSession
-
     def __init__(self, session: AsyncSession) -> None:
-        self._session = session
+        self._session: AsyncSession = session
 
     async def get_by_name(self, player_name: str) -> Player | None:
         query = select(Player).where(func.lower(Player.name) == func.lower(player_name))
@@ -65,7 +63,10 @@ class PlayerRepository:
             )
             .distinct(Leaderboard.name)
             .select_from(LeaderboardEntry)
-            .join(LeaderboardSnapshot, LeaderboardSnapshot.id == LeaderboardEntry.snapshot_id)
+            .join(
+                LeaderboardSnapshot,
+                LeaderboardSnapshot.id == LeaderboardEntry.snapshot_id,
+            )
             .join(Leaderboard, Leaderboard.id == LeaderboardSnapshot.leaderboard_id)
             .where(func.lower(LeaderboardEntry.player_name) == func.lower(player_name))
             .order_by(Leaderboard.name, LeaderboardSnapshot.fetched_at.desc())
@@ -73,7 +74,7 @@ class PlayerRepository:
 
         result = await self._session.execute(query)
 
-        return [PlayerEntryRow(**entry) for entry in result.mappings()]
+        return [PlayerEntryRow(**entry) for entry in result.mappings()]  # pyright: ignore[reportAny]
 
 
 def get_player_repository(

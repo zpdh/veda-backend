@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -6,7 +8,7 @@ class PlayerEntryOut(BaseModel):
     rank: int
     value: int
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )
 
@@ -16,6 +18,6 @@ class PlayerResponse(BaseModel):
     total_completions: int = Field(alias="totalCompletions")
     entries: list[PlayerEntryOut]
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )

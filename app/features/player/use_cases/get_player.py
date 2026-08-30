@@ -1,5 +1,3 @@
-from reprlib import aRepr
-
 from fastapi import Depends
 from redis.asyncio import Redis
 
