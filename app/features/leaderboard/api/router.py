@@ -7,12 +7,16 @@ from app.features.leaderboard.dto.response import (
     LeaderboardNamesResponse,
     SnapshotCreatedResponse,
     SnapshotResponse,
+    ConfigResponse
 )
 from app.features.leaderboard.use_cases.create_snapshot import CreateSnapshot
 from app.features.leaderboard.use_cases.get_latest_snapshot import GetLatestSnapshot
 from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboardNames
+from app.features.leaderboard.use_cases.get_config import GetConfig
 
-leaderboard_router = APIRouter(prefix="/v1/api/leaderboards", tags=["leaderboards"])
+leaderboard_router = APIRouter(
+    prefix="/v1/api/leaderboards", tags=["leaderboards"])
+config_router = APIRouter(prefix="/v1/api/config", tags=["configs"])
 
 _LIMITER_VALUE_GET: str = "60/minute"
 _LIMITER_VALUE_POST: str = "5/minute"
@@ -42,3 +46,11 @@ async def post_snapshot(
     request: Request, req: CreateSnapshotRequest, use_case: CreateSnapshot = Depends()
 ) -> SnapshotCreatedResponse:
     return await use_case.execute(req)
+
+
+@config_router.get("")
+@limiter.limit(limit_value=_LIMITER_VALUE_GET)
+async def get_config(
+    request: Request, use_case: GetConfig = Depends()
+) -> ConfigResponse:
+    return await use_case.execute()
