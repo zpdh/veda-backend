@@ -11,10 +11,8 @@ from app.features.leaderboard.entities.orm import Leaderboard, LeaderboardSnapsh
 
 
 class LeaderboardRepository:
-    _session: AsyncSession
-
     def __init__(self, session: AsyncSession) -> None:
-        self._session = session
+        self._session: AsyncSession = session
 
     async def get_leaderboard_by_name(self, name: str) -> Leaderboard | None:
         query = select(Leaderboard).where(func.lower(Leaderboard.name) == func.lower(name))
