@@ -42,7 +42,7 @@ class PlayerRepository:
         command = (
             pg_insert(Player)
             .values(name=player_name)
-            .on_conflict_do_nothing(index_elements="name")
+            .on_conflict_do_nothing(index_elements=["name"])
             .returning(Player)
         )
 
@@ -65,6 +65,7 @@ class PlayerRepository:
             )
             .distinct(Leaderboard.name)
             .select_from(LeaderboardEntry)
+            .join(LeaderboardSnapshot, LeaderboardSnapshot.id == LeaderboardEntry.snapshot_id)
             .join(Leaderboard, Leaderboard.id == LeaderboardSnapshot.leaderboard_id)
             .where(func.lower(LeaderboardEntry.player_name) == func.lower(player_name))
             .order_by(Leaderboard.name, LeaderboardSnapshot.fetched_at.desc())
