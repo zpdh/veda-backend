@@ -21,9 +21,6 @@ from app.features.player.repositories.postgres import (
 
 
 class CreateSnapshot:
-    _unit_of_work: UnitOfWork
-    _lb_repo: LeaderboardRepository
-
     def __init__(
         self,
         uow: UnitOfWork = Depends(get_unit_of_work),
@@ -31,10 +28,10 @@ class CreateSnapshot:
         lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),
         player_repo: PlayerRepository = Depends(get_player_repository),
     ) -> None:
-        self._unit_of_work = uow
-        self._redis = redis
-        self._lb_repo = lb_repo
-        self._player_repo = player_repo
+        self._unit_of_work: UnitOfWork = uow
+        self._redis: Redis = redis
+        self._lb_repo: LeaderboardRepository = lb_repo
+        self._player_repo: PlayerRepository = player_repo
 
     async def execute(self, req: CreateSnapshotRequest) -> SnapshotCreatedResponse:
         snapshot_ids: list[int] = []

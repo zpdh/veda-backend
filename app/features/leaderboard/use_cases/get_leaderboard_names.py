@@ -8,13 +8,12 @@ from app.features.leaderboard.repositories.postgres import (
 
 
 class GetLeaderboardNames:
-    lb_repo: LeaderboardRepository
 
     def __init__(
         self, lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository)
     ) -> None:
-        self.lb_repo = lb_repo
+        self._lb_repo: LeaderboardRepository = lb_repo
 
     async def execute(self) -> LeaderboardNamesResponse:
-        lbs = await self.lb_repo.get_leaderboards()
+        lbs = await self._lb_repo.get_leaderboards()
         return LeaderboardNamesResponse(leaderboardNames=[lb.name for lb in lbs])
