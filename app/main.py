@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     await close_redis()
 
 
-app = FastAPI(title="Veda", version="1.0")
+app = FastAPI(title="Veda", version="1.0", lifespan=lifespan)
 
 app.state.limiter = rate_limiter.limiter
 

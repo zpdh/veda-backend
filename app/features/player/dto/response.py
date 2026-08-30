@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class PlayerEntryOut(BaseModel):
-    leaderboard_name: str = Field(alias="LeaderboardName")
+    leaderboard_name: str = Field(alias="leaderboardName")
     rank: int
     value: int
 
