@@ -9,6 +9,9 @@ class PlayerErrors(Enum):
 
 class PlayerError(AppError):
     def __init__(
-        self, error_desc: PlayerErrors, message: str, details: dict | None = None
+        self,
+        error_desc: PlayerErrors,
+        message: str,
+        details: dict[str, object] | None = None,
     ) -> None:
         super().__init__(error_desc.value, message, details)

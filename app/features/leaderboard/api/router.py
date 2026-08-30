@@ -17,7 +17,7 @@ leaderboard_router = APIRouter(prefix="/v1/api/leaderboards", tags=["leaderboard
 
 
 @leaderboard_router.get("")
-@limiter.limit(limit_value=LIMITER_HTTP_GET)
+@limiter.limit(LIMITER_HTTP_GET)
 async def get_leaderboard_names(
     request: Request, use_case: GetLeaderboardNames = Depends()
 ) -> LeaderboardNamesResponse:
@@ -25,7 +25,7 @@ async def get_leaderboard_names(
 
 
 @leaderboard_router.get("/{leaderboard_name}")
-@limiter.limit(limit_value=LIMITER_HTTP_GET)
+@limiter.limit(LIMITER_HTTP_GET)
 async def get_latest_snapshot(
     request: Request, leaderboard_name: str, use_case: GetLatestSnapshot = Depends()
 ) -> SnapshotResponse:
@@ -35,7 +35,7 @@ async def get_latest_snapshot(
 @leaderboard_router.post(
     "/snapshot", status_code=201, dependencies=[Security(verify_auth_token)]
 )
-@limiter.limit(limit_value=LIMITER_HTTP_POST)
+@limiter.limit(LIMITER_HTTP_POST)
 async def post_snapshot(
     request: Request, req: CreateSnapshotRequest, use_case: CreateSnapshot = Depends()
 ) -> SnapshotCreatedResponse:

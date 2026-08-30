@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import cast
+from typing import TypeAlias, cast
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -24,13 +24,13 @@ class AppError(Exception):
     status_code: int
     error_code: str
     message: str
-    details: dict | None
+    details: dict[str, object] | None
 
     def __init__(
         self,
         error_desc: ErrorDescription,
         message: str,
-        details: dict | None = None,
+        details: dict[str, object] | None = None,
     ) -> None:
         self.status_code = error_desc.status_code
         self.error_code = error_desc.error_code

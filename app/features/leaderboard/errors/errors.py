@@ -11,6 +11,9 @@ class LeaderboardErrors(Enum):
 
 class LeaderboardError(AppError):
     def __init__(
-        self, error_desc: LeaderboardErrors, message: str, details: dict | None = None
+        self,
+        error_desc: LeaderboardErrors,
+        message: str,
+        details: dict[str, object] | None = None,
     ) -> None:
         super().__init__(error_desc.value, message, details)
