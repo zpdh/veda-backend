@@ -14,7 +14,7 @@ player_router = APIRouter(prefix=f"{API_ROUTE_PREFIX}/players", tags=["players"]
 async def get_player(
     request: Request,
     player_name: str = Path(
-        ..., min_length=1, max_length=16, regex=r"^[a-zA-Z0-9_]+$"
+        ..., min_length=1, max_length=16, pattern=r"^[a-zA-Z0-9_]+$"
     ),  # regex reads out as any alphanum string
     use_case: GetPlayer = Depends(),
 ) -> PlayerResponse:

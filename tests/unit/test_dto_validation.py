@@ -17,31 +17,31 @@ class TestEntryInDTO:
         assert entry.value == 100
 
     def test_valid_entry_by_field_name(self):
-        entry = EntryIn(rank=2, player_name="Bob", value=0)
+        entry = EntryIn(rank=2, playerName="Bob", value=0)
         assert entry.player_name == "Bob"
         assert entry.value == 0
 
     def test_rank_must_be_greater_than_zero(self):
         with pytest.raises(ValidationError):
-            EntryIn(rank=0, playerName="Alice", value=10)
+            _ = EntryIn(rank=0, playerName="Alice", value=10)
 
         with pytest.raises(ValidationError):
-            EntryIn(rank=-1, playerName="Alice", value=10)
+            _ = EntryIn(rank=-1, playerName="Alice", value=10)
 
     def test_value_must_be_non_negative(self):
         with pytest.raises(ValidationError):
-            EntryIn(rank=1, playerName="Alice", value=-1)
+            _ = EntryIn(rank=1, playerName="Alice", value=-1)
 
     def test_player_name_empty_raises_validation_error(self):
         with pytest.raises(ValidationError):
-            EntryIn(rank=1, playerName="", value=10)
+            _ = EntryIn(rank=1, playerName="", value=10)
 
     def test_player_name_length_boundary(self):
         valid_16 = EntryIn(rank=1, playerName="A" * 16, value=10)
         assert len(valid_16.player_name) == 16
 
         with pytest.raises(ValidationError):
-            EntryIn(rank=1, playerName="A" * 17, value=10)
+            _ = EntryIn(rank=1, playerName="A" * 17, value=10)
 
 
 class TestLeaderboardSnapshotInDTO:
@@ -49,8 +49,8 @@ class TestLeaderboardSnapshotInDTO:
         snap = LeaderboardSnapshotIn(
             leaderboardName="Global Rankings",
             entries=[
-                {"rank": 1, "playerName": "Alice", "value": 100},
-                {"rank": 2, "playerName": "Bob", "value": 80},
+                EntryIn(rank=1, playerName="Alice", value=100),
+                EntryIn(rank=2, playerName="Bob", value=80),
             ],
         )
         assert snap.leaderboard_name == "Global Rankings"
@@ -58,28 +58,31 @@ class TestLeaderboardSnapshotInDTO:
 
     def test_empty_entries_raises_validation_error(self):
         with pytest.raises(ValidationError):
-            LeaderboardSnapshotIn(
+            _ = LeaderboardSnapshotIn(
                 leaderboardName="Global Rankings",
                 entries=[],
             )
 
     def test_empty_leaderboard_name_raises_validation_error(self):
         with pytest.raises(ValidationError):
-            LeaderboardSnapshotIn(
+            _ = LeaderboardSnapshotIn(
                 leaderboardName="",
-                entries=[{"rank": 1, "playerName": "Alice", "value": 100}],
+                entries=[EntryIn(rank=1, playerName="Alice", value=100)],
             )
 
     def test_duplicate_ranks_raises_custom_leaderboard_error(self):
         with pytest.raises(LeaderboardError) as exc_info:
-            LeaderboardSnapshotIn(
+            _ = LeaderboardSnapshotIn(
                 leaderboardName="Global Rankings",
                 entries=[
-                    {"rank": 1, "playerName": "Alice", "value": 100},
-                    {"rank": 1, "playerName": "Bob", "value": 80},
+                    EntryIn(rank=1, playerName="Alice", value=100),
+                    EntryIn(rank=1, playerName="Bob", value=80),
                 ],
             )
-        assert exc_info.value.error_code == LeaderboardErrors.DUPLICATE_RANK.value.error_code
+        assert (
+            exc_info.value.error_code
+            == LeaderboardErrors.DUPLICATE_RANK.value.error_code
+        )
         assert exc_info.value.status_code == 400
 
 
@@ -87,10 +90,10 @@ class TestCreateSnapshotRequestDTO:
     def test_valid_create_snapshot_request(self):
         req = CreateSnapshotRequest(
             snapshots=[
-                {
-                    "leaderboardName": "Global",
-                    "entries": [{"rank": 1, "playerName": "Alice", "value": 10}],
-                }
+                LeaderboardSnapshotIn(
+                    leaderboardName="Global",
+                    entries=[EntryIn(rank=1, playerName="Alice", value=10)],
+                )
             ]
         )
         assert len(req.snapshots) == 1
@@ -98,4 +101,4 @@ class TestCreateSnapshotRequestDTO:
 
     def test_empty_snapshots_list_raises_validation_error(self):
         with pytest.raises(ValidationError):
-            CreateSnapshotRequest(snapshots=[])
+            _ = CreateSnapshotRequest(snapshots=[])

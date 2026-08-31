@@ -10,7 +10,6 @@ from app.core.db.session import get_db
 from app.core.db.unit_of_work import UnitOfWork, get_unit_of_work
 from app.features.leaderboard.repositories.postgres import (
     LeaderboardRepository,
-    get_leaderboard_repository,
 )
 from app.main import app
 

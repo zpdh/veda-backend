@@ -1,10 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
-
 from app.features.leaderboard.entities.orm import (
     Leaderboard,
-    LeaderboardEntry,
     LeaderboardSnapshot,
 )
 from app.features.leaderboard.repositories.postgres import LeaderboardRepository

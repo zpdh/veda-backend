@@ -23,7 +23,10 @@ class TestBatchAtomicity:
         lb1 = Leaderboard(id=1, name="Global", created_at=now, updated_at=now)
         snap1 = LeaderboardSnapshot(id=10, leaderboard_id=1, fetched_at=now, entries=[])
 
-        repo.upsert_leaderboard.side_effect = [lb1, RuntimeError("DB error during 2nd leaderboard")]
+        repo.upsert_leaderboard.side_effect = [
+            lb1,
+            RuntimeError("DB error during 2nd leaderboard"),
+        ]
         repo.create_snapshot.side_effect = [snap1]
 
         use_case = CreateSnapshot(uow=uow, lb_repo=repo)

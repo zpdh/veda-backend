@@ -25,9 +25,7 @@ class TestAuthSecurity:
         assert exc_info.value.error_code == "ERR_UNAUTHORIZED"
 
     async def test_verify_auth_token_empty_secret_raises_unauthorized(self):
-        empty_creds = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials=""
-        )
+        empty_creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials="")
         with pytest.raises(AppError) as exc_info:
             await verify_auth_token(credentials=empty_creds)
 

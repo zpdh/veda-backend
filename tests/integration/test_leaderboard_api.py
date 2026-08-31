@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 from httpx import AsyncClient
 
 from app.core.config import settings
-from app.core.db.session import get_db
+from app.core.constants import API_ROUTE_PREFIX
 from app.core.db.unit_of_work import UnitOfWork, get_unit_of_work
 from app.features.leaderboard.entities.orm import (
     Leaderboard,
@@ -25,7 +25,7 @@ class TestLeaderboardEndpoints:
 
         app.dependency_overrides[get_leaderboard_repository] = lambda: mock_repo
         try:
-            res = await client.get("/v1/api/leaderboards")
+            res = await client.get(f"{API_ROUTE_PREFIX}/leaderboards")
             assert res.status_code == 200
             data = res.json()
             assert "leaderboardNames" in data
@@ -36,13 +36,23 @@ class TestLeaderboardEndpoints:
     async def test_get_leaderboards_success(self, client: AsyncClient):
         mock_repo = AsyncMock(spec=LeaderboardRepository)
         mock_repo.get_leaderboards.return_value = [
-            Leaderboard(id=1, name="Global", created_at=datetime.now(UTC), updated_at=datetime.now(UTC)),
-            Leaderboard(id=2, name="Weekly", created_at=datetime.now(UTC), updated_at=datetime.now(UTC)),
+            Leaderboard(
+                id=1,
+                name="Global",
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+            ),
+            Leaderboard(
+                id=2,
+                name="Weekly",
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+            ),
         ]
 
         app.dependency_overrides[get_leaderboard_repository] = lambda: mock_repo
         try:
-            res = await client.get("/v1/api/leaderboards")
+            res = await client.get(f"{API_ROUTE_PREFIX}/leaderboards")
             assert res.status_code == 200
             data = res.json()
             assert data["leaderboardNames"] == ["Global", "Weekly"]
@@ -58,8 +68,12 @@ class TestLeaderboardEndpoints:
             leaderboard_id=1,
             fetched_at=now,
             entries=[
-                LeaderboardEntry(id=101, snapshot_id=10, rank=1, player_name="Alice", value=100),
-                LeaderboardEntry(id=102, snapshot_id=10, rank=2, player_name="Bob", value=75),
+                LeaderboardEntry(
+                    id=101, snapshot_id=10, rank=1, player_name="Alice", value=100
+                ),
+                LeaderboardEntry(
+                    id=102, snapshot_id=10, rank=2, player_name="Bob", value=75
+                ),
             ],
         )
         mock_repo.get_leaderboard_by_name.return_value = lb
@@ -67,7 +81,7 @@ class TestLeaderboardEndpoints:
 
         app.dependency_overrides[get_leaderboard_repository] = lambda: mock_repo
         try:
-            res = await client.get("/v1/api/leaderboards/Global")
+            res = await client.get(f"{API_ROUTE_PREFIX}/leaderboards/Global")
             assert res.status_code == 200
             data = res.json()
             assert data["snapshotId"] == 10
@@ -85,7 +99,7 @@ class TestLeaderboardEndpoints:
 
         app.dependency_overrides[get_leaderboard_repository] = lambda: mock_repo
         try:
-            res = await client.get("/v1/api/leaderboards/unknown_board")
+            res = await client.get(f"{API_ROUTE_PREFIX}/leaderboards/unknown_board")
             assert res.status_code == 404
             data = res.json()
             assert data["errorCode"] == "ERR_LEADERBOARD_NOT_FOUND"
@@ -101,7 +115,7 @@ class TestLeaderboardEndpoints:
 
         app.dependency_overrides[get_leaderboard_repository] = lambda: mock_repo
         try:
-            res = await client.get("/v1/api/leaderboards/EmptyBoard")
+            res = await client.get(f"{API_ROUTE_PREFIX}/leaderboards/EmptyBoard")
             assert res.status_code == 404
             data = res.json()
             assert data["errorCode"] == "ERR_SNAPSHOT_NOT_FOUND"
@@ -114,7 +128,9 @@ class TestLeaderboardEndpoints:
         now = datetime.now(UTC)
 
         lb = Leaderboard(id=1, name="Global", created_at=now, updated_at=now)
-        created_snap = LeaderboardSnapshot(id=124, leaderboard_id=1, fetched_at=now, entries=[])
+        created_snap = LeaderboardSnapshot(
+            id=124, leaderboard_id=1, fetched_at=now, entries=[]
+        )
 
         mock_repo.upsert_leaderboard.return_value = lb
         mock_repo.create_snapshot.return_value = created_snap
@@ -134,7 +150,7 @@ class TestLeaderboardEndpoints:
                 ]
             }
             res = await client.post(
-                "/v1/api/leaderboards/snapshot",
+                f"{API_ROUTE_PREFIX}/leaderboards/snapshot",
                 json=payload,
                 headers={"Authorization": f"Bearer {settings.shared_secret}"},
             )
@@ -156,7 +172,9 @@ class TestLeaderboardEndpoints:
                 }
             ]
         }
-        res = await client.post("/v1/api/leaderboards/snapshot", json=payload)
+        res = await client.post(
+            f"{API_ROUTE_PREFIX}/leaderboards/snapshot", json=payload
+        )
         assert res.status_code == 401 or res.status_code == 403
 
     async def test_post_snapshot_unauthorized_invalid_token(self, client: AsyncClient):
@@ -169,7 +187,7 @@ class TestLeaderboardEndpoints:
             ]
         }
         res = await client.post(
-            "/v1/api/leaderboards/snapshot",
+            f"{API_ROUTE_PREFIX}/leaderboards/snapshot",
             json=payload,
             headers={"Authorization": "Bearer bad-token"},
         )
@@ -190,7 +208,7 @@ class TestLeaderboardEndpoints:
             ]
         }
         res = await client.post(
-            "/v1/api/leaderboards/snapshot",
+            f"{API_ROUTE_PREFIX}/leaderboards/snapshot",
             json=payload,
             headers={"Authorization": f"Bearer {settings.shared_secret}"},
         )

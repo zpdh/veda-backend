@@ -39,7 +39,7 @@ class GetPlayer:
         entry_rows = await self._player_repo.get_player_entries(player_name)
         entries = [
             PlayerEntryOut(
-                LeaderboardName=entry.leaderboard_name,
+                leaderboardName=entry.leaderboard_name,
                 rank=entry.rank,
                 value=entry.value,
             )
