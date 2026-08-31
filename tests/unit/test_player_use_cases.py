@@ -19,7 +19,7 @@ class TestGetAllPlayersUseCase:
         use_case = GetAllPlayers(player_repo=player_repo)
         res = await use_case.execute()
 
-        assert [player.username for player in res.players] == ["Alice", "Bob"]
+        assert res.players == ["Alice", "Bob"]
         player_repo.get_all.assert_awaited_once()
 
     async def test_returns_empty_list_when_no_players_exist(self):
@@ -42,9 +42,7 @@ class TestGetPlayerUseCase:
             totalCompletions=100,
             entries=[{"leaderboardName": "Global", "rank": 1, "value": 100}],
         )
-        redis.get = AsyncMock(
-            return_value=cached_dto.model_dump_json(by_alias=True)
-        )
+        redis.get = AsyncMock(return_value=cached_dto.model_dump_json(by_alias=True))
 
         use_case = GetPlayer(player_repo=player_repo, redis=redis)
         res = await use_case.execute("Alice")

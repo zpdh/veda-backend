@@ -24,9 +24,7 @@ class TestPlayerEndpoints:
         try:
             res = await client.get(f"{API_ROUTE_PREFIX}/players/")
             assert res.status_code == 200
-            assert res.json() == {
-                "players": [{"username": "Alice"}, {"username": "Bob"}]
-            }
+            assert res.json() == {"players": ["Alice", "Bob"]}
             mock_repo.get_all.assert_awaited_once()
         finally:
             app.dependency_overrides.clear()

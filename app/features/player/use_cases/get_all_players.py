@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from app.features.player.dto.response import AllPlayersResponse, AllPlayersResponseOut
+from app.features.player.dto.response import AllPlayersResponse
 from app.features.player.repositories.postgres import (
     PlayerRepository,
     get_player_repository,
@@ -16,6 +16,4 @@ class GetAllPlayers:
     async def execute(self) -> AllPlayersResponse:
         res = await self._player_repo.get_all()
 
-        return AllPlayersResponse(
-            players=[AllPlayersResponseOut(username=player.name) for player in res]
-        )
+        return AllPlayersResponse(players=[player.name for player in res])
