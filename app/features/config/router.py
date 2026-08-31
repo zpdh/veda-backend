@@ -5,7 +5,7 @@ from app.features.config.get_config import GetConfig
 from app.features.config.response import ConfigResponse
 from app.features.leaderboard.api.router import _LIMITER_VALUE_GET
 
-config_router = APIRouter(prefix="/v1/api/config", tags=["configs"])
+config_router = APIRouter(prefix="/v1/api/config", tags=["config"])
 
 
 @config_router.get("/")
