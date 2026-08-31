@@ -15,6 +15,11 @@ from app.features.leaderboard.repositories.postgres import (
     LeaderboardRepository,
     get_leaderboard_repository,
 )
+from app.features.player.entities.orm import Player
+from app.features.player.repositories.postgres import (
+    PlayerRepository,
+    get_player_repository,
+)
 from app.main import app
 
 
@@ -123,7 +128,8 @@ class TestLeaderboardEndpoints:
             app.dependency_overrides.clear()
 
     async def test_post_snapshot_success(self, client: AsyncClient):
-        mock_repo = AsyncMock(spec=LeaderboardRepository)
+        mock_lb_repo = AsyncMock(spec=LeaderboardRepository)
+        mock_player_repo = AsyncMock(spec=PlayerRepository)
         mock_uow = AsyncMock(spec=UnitOfWork)
         now = datetime.now(UTC)
 
@@ -131,11 +137,14 @@ class TestLeaderboardEndpoints:
         created_snap = LeaderboardSnapshot(
             id=124, leaderboard_id=1, fetched_at=now, entries=[]
         )
+        player = Player(id=1, name="Alice")
 
-        mock_repo.upsert_leaderboard.return_value = lb
-        mock_repo.create_snapshot.return_value = created_snap
+        mock_lb_repo.upsert_leaderboard.return_value = lb
+        mock_lb_repo.create_snapshot.return_value = created_snap
+        mock_player_repo.upsert_player.return_value = player
 
-        app.dependency_overrides[get_leaderboard_repository] = lambda: mock_repo
+        app.dependency_overrides[get_leaderboard_repository] = lambda: mock_lb_repo
+        app.dependency_overrides[get_player_repository] = lambda: mock_player_repo
         app.dependency_overrides[get_unit_of_work] = lambda: mock_uow
         try:
             payload = {
