@@ -14,6 +14,7 @@ from app.core.errors import (
     rate_limit_handler,
 )
 from app.core.security import rate_limiter
+from app.features.config.router import config_router
 from app.features.leaderboard.api.router import leaderboard_router
 from app.features.player.api.router import player_router
 
@@ -43,3 +44,4 @@ app.add_exception_handler(Exception, error_handler)
 
 app.include_router(leaderboard_router)
 app.include_router(player_router)
+app.include_router(config_router)
