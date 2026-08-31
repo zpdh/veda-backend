@@ -14,16 +14,6 @@ class EntryOut(BaseModel):
     )
 
 
-class ConfigOut(BaseModel):
-    leaderboard_name: str = Field(alias="leaderboardName")
-    leaderboard_id: str = Field(alias="leaderboardId")
-    pages: int
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
-    )
-
-
 class SnapshotResponse(BaseModel):
     snapshot_id: int = Field(alias="snapshotId")
     leaderboard_name: str = Field(alias="leaderboardName")
@@ -47,14 +37,6 @@ class SnapshotCreatedResponse(BaseModel):
 
 class LeaderboardNamesResponse(BaseModel):
     leaderboard_names: list[str] = Field(alias="leaderboardNames")
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
-    )
-
-
-class ConfigResponse(BaseModel):
-    config: list[ConfigOut]
 
     model_config = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
