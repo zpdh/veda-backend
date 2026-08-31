@@ -8,7 +8,7 @@ from app.features.config.response import ConfigResponse
 config_router = APIRouter(prefix=f"{API_ROUTE_PREFIX}/config", tags=["config"])
 
 
-@config_router.get("/")
+@config_router.get("")
 @limiter.limit(LIMITER_HTTP_GET)
 async def get_config(
     request: Request, use_case: GetConfig = Depends()
