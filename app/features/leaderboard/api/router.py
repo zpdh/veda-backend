@@ -11,9 +11,9 @@ from app.features.leaderboard.dto.response import (
 from app.features.leaderboard.use_cases.create_snapshot import CreateSnapshot
 from app.features.leaderboard.use_cases.get_latest_snapshot import GetLatestSnapshot
 from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboardNames
-from app.core.constants import LIMITER_HTTP_GET, LIMITER_HTTP_POST
+from app.core.constants import API_ROUTE_PREFIX, LIMITER_HTTP_GET, LIMITER_HTTP_POST
 
-leaderboard_router = APIRouter(prefix="/v1/api/leaderboards", tags=["leaderboards"])
+leaderboard_router = APIRouter(prefix=f"{API_ROUTE_PREFIX}/leaderboards", tags=["leaderboards"])
 
 
 @leaderboard_router.get("")
