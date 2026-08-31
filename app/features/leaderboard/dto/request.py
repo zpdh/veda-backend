@@ -18,7 +18,7 @@ class EntryIn(BaseModel):
 
 
 class LeaderboardSnapshotIn(BaseModel):
-    leaderboard_name: str = Field(alias="leaderboardName", min_length=1, max_length=255)
+    leaderboard_name: str = Field(alias="leaderboardName", min_length=1, max_length=128, pattern=r"^[a-zA-Z0-9 _.-]+$" )
     entries: list[EntryIn] = Field(alias="entries", min_length=1)
 
     model_config: ClassVar[ConfigDict] = ConfigDict(validate_by_name=True, validate_by_alias=True)
