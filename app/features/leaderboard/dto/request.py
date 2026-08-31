@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.constants import PLAYER_USERNAME_PATTERN
 from app.features.leaderboard.errors.errors import (
     LeaderboardError,
     LeaderboardErrors,
@@ -11,7 +12,7 @@ from app.features.leaderboard.errors.errors import (
 
 class EntryIn(BaseModel):
     rank: int = Field(gt=0)
-    player_name: str = Field(alias="playerName", min_length=1, max_length=16, pattern=r"^[a-zA-Z0-9_]+$")
+    player_name: str = Field(alias="playerName", min_length=1, max_length=16, pattern=PLAYER_USERNAME_PATTERN)
     value: int = Field(ge=0)
 
     model_config: ClassVar[ConfigDict]  = ConfigDict(validate_by_name=True, validate_by_alias=True)

@@ -25,6 +25,12 @@ class PlayerRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session: AsyncSession = session
 
+    async def get_all(self) -> list[Player]:
+        query = select(Player)
+        result = await self._session.execute(query)
+
+        return list(result.scalars().all())
+
     async def get_by_name(self, player_name: str) -> Player | None:
         query = select(Player).where(func.lower(Player.name) == func.lower(player_name))
         result = await self._session.execute(query)
