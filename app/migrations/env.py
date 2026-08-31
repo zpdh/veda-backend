@@ -13,6 +13,9 @@ from app.core.db.base import Base
 from app.features.leaderboard.entities import (
     orm,  # noqa: F401 pyright: ignore[reportUnusedImport]
 )
+from app.features.player.entities import (
+    orm,  # noqa: F401 pyright: ignore[reportUnusedImport]
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

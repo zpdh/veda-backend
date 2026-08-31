@@ -9,13 +9,11 @@ from app.features.leaderboard.repositories.postgres import (
 
 
 class GetLatestSnapshot:
-    _lb_repo: LeaderboardRepository
-
     def __init__(
         self,
         lb_repo: LeaderboardRepository = Depends(get_leaderboard_repository),
     ) -> None:
-        self._lb_repo = lb_repo
+        self._lb_repo: LeaderboardRepository = lb_repo
 
     async def execute(self, leaderboard_name: str) -> SnapshotResponse:
         leaderboard = await self._lb_repo.get_leaderboard_by_name(leaderboard_name)
