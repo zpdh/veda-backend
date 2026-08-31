@@ -13,6 +13,36 @@ from app.main import app
 
 
 class TestPlayerEndpoints:
+    async def test_get_all_players_success(self, client: AsyncClient):
+        mock_repo = AsyncMock(spec=PlayerRepository)
+        mock_repo.get_all.return_value = [
+            Player(id=1, name="Alice"),
+            Player(id=2, name="Bob"),
+        ]
+
+        app.dependency_overrides[get_player_repository] = lambda: mock_repo
+        try:
+            res = await client.get(f"{API_ROUTE_PREFIX}/players/")
+            assert res.status_code == 200
+            assert res.json() == {
+                "players": [{"username": "Alice"}, {"username": "Bob"}]
+            }
+            mock_repo.get_all.assert_awaited_once()
+        finally:
+            app.dependency_overrides.clear()
+
+    async def test_get_all_players_empty(self, client: AsyncClient):
+        mock_repo = AsyncMock(spec=PlayerRepository)
+        mock_repo.get_all.return_value = []
+
+        app.dependency_overrides[get_player_repository] = lambda: mock_repo
+        try:
+            res = await client.get(f"{API_ROUTE_PREFIX}/players/")
+            assert res.status_code == 200
+            assert res.json() == {"players": []}
+        finally:
+            app.dependency_overrides.clear()
+
     async def test_get_player_success(self, client: AsyncClient):
         mock_repo = AsyncMock(spec=PlayerRepository)
         player = Player(id=1, name="Alice")
