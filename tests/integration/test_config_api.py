@@ -5,7 +5,7 @@ from app.core.constants import API_ROUTE_PREFIX
 
 class TestConfigEndpoints:
     async def test_get_config(self, client: AsyncClient):
-        res = await client.get(f"{API_ROUTE_PREFIX}/config/")
+        res = await client.get(f"{API_ROUTE_PREFIX}/config")
         assert res.status_code == 200
         data = res.json()
         assert "config" in data
