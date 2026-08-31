@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Security
+from fastapi import APIRouter, Depends, Path, Request, Security
 
 from app.core.security.auth import verify_auth_token
 from app.core.security.rate_limiter import limiter
@@ -13,7 +13,9 @@ from app.features.leaderboard.use_cases.get_latest_snapshot import GetLatestSnap
 from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboardNames
 from app.core.constants import API_ROUTE_PREFIX, LIMITER_HTTP_GET, LIMITER_HTTP_POST
 
-leaderboard_router = APIRouter(prefix=f"{API_ROUTE_PREFIX}/leaderboards", tags=["leaderboards"])
+leaderboard_router = APIRouter(
+    prefix=f"{API_ROUTE_PREFIX}/leaderboards", tags=["leaderboards"]
+)
 
 
 @leaderboard_router.get("")
@@ -27,7 +29,9 @@ async def get_leaderboard_names(
 @leaderboard_router.get("/{leaderboard_name}")
 @limiter.limit(LIMITER_HTTP_GET)
 async def get_latest_snapshot(
-    request: Request, leaderboard_name: str, use_case: GetLatestSnapshot = Depends()
+    request: Request,
+    leaderboard_name: str,
+    use_case: GetLatestSnapshot = Depends(),
 ) -> SnapshotResponse:
     return await use_case.execute(leaderboard_name)
 
