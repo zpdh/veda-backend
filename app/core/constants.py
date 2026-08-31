@@ -2,3 +2,6 @@ LIMITER_HTTP_GET: str = "60/minute"
 LIMITER_HTTP_POST: str = "5/minute"
 CACHE_TTL_SECONDS = 3600
 API_ROUTE_PREFIX = "/api/v1"
+
+LEADERBOARD_NAME_PATTERN = r"^[a-zA-Z0-9 _.-]+$"
+PLAYER_USERNAME_PATTERN = r"^[a-zA-Z0-9_]+$"

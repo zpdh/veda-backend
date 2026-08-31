@@ -4,7 +4,33 @@ from app.features.player.dto.response import PlayerResponse
 from app.features.player.entities.orm import Player
 from app.features.player.errors.errors import PlayerError, PlayerErrors
 from app.features.player.repositories.postgres import PlayerEntryRow, PlayerRepository
+from app.features.player.use_cases.get_all_players import GetAllPlayers
 from app.features.player.use_cases.get_player import GetPlayer
+
+
+class TestGetAllPlayersUseCase:
+    async def test_returns_all_player_usernames(self):
+        player_repo = AsyncMock(spec=PlayerRepository)
+        player_repo.get_all.return_value = [
+            Player(id=1, name="Alice"),
+            Player(id=2, name="Bob"),
+        ]
+
+        use_case = GetAllPlayers(player_repo=player_repo)
+        res = await use_case.execute()
+
+        assert res.players == ["Alice", "Bob"]
+        player_repo.get_all.assert_awaited_once()
+
+    async def test_returns_empty_list_when_no_players_exist(self):
+        player_repo = AsyncMock(spec=PlayerRepository)
+        player_repo.get_all.return_value = []
+
+        use_case = GetAllPlayers(player_repo=player_repo)
+        res = await use_case.execute()
+
+        assert res.players == []
+        player_repo.get_all.assert_awaited_once()
 
 
 class TestGetPlayerUseCase:
@@ -16,9 +42,7 @@ class TestGetPlayerUseCase:
             totalCompletions=100,
             entries=[{"leaderboardName": "Global", "rank": 1, "value": 100}],
         )
-        redis.get = AsyncMock(
-            return_value=cached_dto.model_dump_json(by_alias=True)
-        )
+        redis.get = AsyncMock(return_value=cached_dto.model_dump_json(by_alias=True))
 
         use_case = GetPlayer(player_repo=player_repo, redis=redis)
         res = await use_case.execute("Alice")

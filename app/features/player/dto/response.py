@@ -1,6 +1,12 @@
-from typing import ClassVar
+from typing import Annotated, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from app.core.constants import PLAYER_USERNAME_PATTERN
+
+PlayerUsername = Annotated[
+    str, Field(min_length=1, max_length=16, pattern=PLAYER_USERNAME_PATTERN)
+]
 
 
 class PlayerEntryOut(BaseModel):
@@ -14,9 +20,17 @@ class PlayerEntryOut(BaseModel):
 
 
 class PlayerResponse(BaseModel):
-    username: str
+    username: PlayerUsername
     total_completions: int = Field(alias="totalCompletions")
     entries: list[PlayerEntryOut]
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
+    )
+
+
+class AllPlayersResponse(BaseModel):
+    players: list[PlayerUsername]
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
