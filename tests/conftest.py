@@ -26,6 +26,14 @@ rate_limiter.limiter._storage = _mem_storage
 rate_limiter.limiter._limiter = MovingWindowRateLimiter(_mem_storage)
 
 
+@pytest.fixture(autouse=True)
+def reset_rate_limiter_before_each_test():
+    """Reset the in-memory rate limiter before each test execution to ensure isolation."""
+    rate_limiter.limiter.reset()
+    yield
+    rate_limiter.limiter.reset()
+
+
 @pytest.fixture
 def mock_redis() -> AsyncMock:
     redis = AsyncMock()
@@ -73,7 +81,7 @@ def auth_headers() -> dict[str, str]:
 async def client(mock_redis: AsyncMock) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_redis] = lambda: mock_redis
     async with AsyncClient(
-        transport=ASGITransport(app=app),
+        transport=ASGITransport(app=app, client=("127.0.0.1", 50000)),
         base_url="http://test",
     ) as ac:
         yield ac
@@ -96,7 +104,7 @@ async def client_with_mock_db(
     app.dependency_overrides[get_redis] = lambda: mock_redis
 
     async with AsyncClient(
-        transport=ASGITransport(app=app),
+        transport=ASGITransport(app=app, client=("127.0.0.1", 50000)),
         base_url="http://test",
     ) as ac:
         yield ac
