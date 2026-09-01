@@ -16,7 +16,7 @@ from app.features.leaderboard.errors.errors import LeaderboardError, Leaderboard
 from app.features.leaderboard.repositories.postgres import LeaderboardRepository
 from app.features.leaderboard.use_cases.create_snapshot import CreateSnapshot
 from app.features.leaderboard.use_cases.get_latest_snapshot import GetLatestSnapshot
-from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboardNames
+from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboards
 from app.features.player.entities.orm import Player
 from app.features.player.repositories.postgres import PlayerRepository
 
@@ -26,7 +26,7 @@ class TestGetLeaderboardNamesUseCase:
         repo = AsyncMock(spec=LeaderboardRepository)
         repo.get_leaderboards.return_value = []
 
-        use_case = GetLeaderboardNames(lb_repo=repo)
+        use_case = GetLeaderboards(lb_repo=repo)
         response = await use_case.execute()
 
         assert response.leaderboard_names == []
@@ -48,7 +48,7 @@ class TestGetLeaderboardNamesUseCase:
         )
         repo.get_leaderboards.return_value = [lb1, lb2]
 
-        use_case = GetLeaderboardNames(lb_repo=repo)
+        use_case = GetLeaderboards(lb_repo=repo)
         response = await use_case.execute()
 
         assert response.leaderboard_names == ["Global", "Weekly"]

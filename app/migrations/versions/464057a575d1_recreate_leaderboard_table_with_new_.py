@@ -65,12 +65,12 @@ def upgrade() -> None:
         ('Twisted lxxxxxxx Wins', 'Twisted Intruder', 5, 2),
         ('Aurora Defeats (Caches Claimed)', 'Aurora', 4, 4),
         ('Hexfall - Hycenea Defeats', 'Hexfall' , 8, 4),
-        ('SKT Savage Mode Clears', 'Silver Knights Tomb', 8, 4),
+        ('SKT Savage Mode Clears', 'Silver Knights Tomb', 15, 4),
         ('Godspore Clears', 'Godspore', 4, 4)
-        ('Portal', 'Portal', 2, 4),
-        ('MasqueradersRuin', 'Masqueraders Ruin', 7, 6),
-        ('Combat Remnants Looted', 'Silver Knight Remnants (Combat)', 6, 1),
-        ('Puzzle Remnants Looted', 'Silver Knight Remnants (Puzzle)', 8, 1)
+        ('Portal', 'Portal', 3, 4),
+        ('MasqueradersRuin', 'Masqueraders Ruin', 8, 6),
+        ('Combat Remnants Looted', 'Silver Knight Remnants (Combat)', 4, 1),
+        ('Puzzle Remnants Looted', 'Silver Knight Remnants (Puzzle)', 4, 1)
         """)
 
 
