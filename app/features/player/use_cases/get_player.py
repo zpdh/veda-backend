@@ -36,7 +36,16 @@ class GetPlayer:
                 {"playerName": player_name},
             )
 
-        entry_rows = await self._player_repo.get_player_entries(player_name)
+        response = await self._map_player_response(player)
+
+        _ = await self._redis.set(
+            cache_key, response.model_dump_json(by_alias=True), ex=CACHE_TTL_SECONDS
+        )
+
+        return response
+
+    async def _map_player_response(self, player: Player) -> PlayerResponse:
+        entry_rows = await self._player_repo.get_player_entries(player.name)
         entries = [
             PlayerEntryOut(
                 leaderboardName=entry.leaderboard_name,
@@ -53,15 +62,9 @@ class GetPlayer:
             entry.estimated_playtime_minutes for entry in entries
         )
 
-        response = PlayerResponse(
-            username=player.name,
-            totalCompletions=total_comps,
-            totalPlaytimeMinutes=total_playtime_minutes,
-            entries=entries,
-        )
-
-        _ = await self._redis.set(
-            cache_key, response.model_dump_json(by_alias=True), ex=CACHE_TTL_SECONDS
-        )
-
-        return response
+        return  PlayerResponse(
+                  username=player.name,
+                  totalCompletions=total_comps,
+                  totalPlaytimeMinutes=total_playtime_minutes,
+                  entries=entries,
+              )
