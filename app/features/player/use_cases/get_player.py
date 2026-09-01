@@ -4,6 +4,7 @@ from redis.asyncio import Redis
 from app.core.constants import CACHE_TTL_SECONDS
 from app.core.db.cache import get_redis
 from app.features.player.dto.response import PlayerEntryOut, PlayerResponse
+from app.features.player.entities.orm import Player
 from app.features.player.errors.errors import PlayerError, PlayerErrors
 from app.features.player.repositories.postgres import (
     PlayerRepository,
@@ -22,7 +23,6 @@ class GetPlayer:
 
     async def execute(self, player_name: str) -> PlayerResponse:
         cache_key = f"player:{player_name.lower()}"
-
         cached_player = await self._redis.get(cache_key)
 
         if cached_player is not None:
@@ -42,6 +42,8 @@ class GetPlayer:
                 leaderboardName=entry.leaderboard_name,
                 rank=entry.rank,
                 value=entry.value,
+                estimatedPlaytimeMinutes=entry.value
+                * entry.estimated_time_per_completion_minutes,
             )
             for entry in entry_rows
         ]

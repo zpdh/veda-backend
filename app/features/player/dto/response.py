@@ -13,6 +13,7 @@ class PlayerEntryOut(BaseModel):
     leaderboard_name: str = Field(alias="leaderboardName")
     rank: int
     value: int
+    estimated_playtime_minutes: int = Field(alias="estimatedPlaytimeMinutes")
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
