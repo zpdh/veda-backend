@@ -62,9 +62,9 @@ def upgrade() -> None:
         INSERT INTO leaderboard (external_leaderboard_id, name, estimated_time_per_completion_minutes, group_size)
         VALUES
         ('Zenith Clears', 'Celestial Zenith', 15, 4),
-        ('Twisted lxxxxxxx Wins', 'Twisted Intruder', 4, 2),
+        ('Twisted lxxxxxxx Wins', 'Twisted Intruder', 5, 2),
         ('Aurora Defeats (Caches Claimed)', 'Aurora', 4, 4),
-        ('Hexfall - Hycenea Defeats', 'Hexfall' , 5, 4),
+        ('Hexfall - Hycenea Defeats', 'Hexfall' , 8, 4),
         ('SKT Savage Mode Clears', 'Silver Knights Tomb', 8, 4),
         ('Godspore Clears', 'Godspore', 4, 4)
         ('Portal', 'Portal', 2, 4),
