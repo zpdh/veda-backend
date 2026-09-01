@@ -29,20 +29,26 @@ class TestGetLeaderboardNamesUseCase:
         use_case = GetLeaderboards(lb_repo=repo)
         response = await use_case.execute()
 
-        assert response.leaderboard_names == []
+        assert response.leaderboards == []
         repo.get_leaderboards.assert_awaited_once()
 
     async def test_get_leaderboard_names_returns_list(self):
         repo = AsyncMock(spec=LeaderboardRepository)
         lb1 = Leaderboard(
             id=1,
+            external_leaderboard_id="global-id",
             name="Global",
+            estimated_time_per_completion_minutes=30,
+            group_size=1,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )
         lb2 = Leaderboard(
             id=2,
+            external_leaderboard_id="weekly-id",
             name="Weekly",
+            estimated_time_per_completion_minutes=45,
+            group_size=1,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )
@@ -51,7 +57,12 @@ class TestGetLeaderboardNamesUseCase:
         use_case = GetLeaderboards(lb_repo=repo)
         response = await use_case.execute()
 
-        assert response.leaderboard_names == ["Global", "Weekly"]
+        assert [lb.leaderboard_name for lb in response.leaderboards] == [
+            "Global", "Weekly"
+        ]
+        assert [lb.leaderboard_id for lb in response.leaderboards] == [
+            "global-id", "weekly-id"
+        ]
 
 
 class TestGetLatestSnapshotUseCase:
@@ -94,7 +105,15 @@ class TestGetLatestSnapshotUseCase:
     async def test_get_latest_snapshot_success(self):
         repo = AsyncMock(spec=LeaderboardRepository)
         now = datetime.now(UTC)
-        lb = Leaderboard(id=1, name="Global", created_at=now, updated_at=now)
+        lb = Leaderboard(
+            id=1,
+            external_leaderboard_id="global-id",
+            name="Global",
+            estimated_time_per_completion_minutes=30,
+            group_size=1,
+            created_at=now,
+            updated_at=now,
+        )
         snapshot = LeaderboardSnapshot(
             id=10,
             leaderboard_id=1,
@@ -139,13 +158,27 @@ class TestCreateSnapshotUseCase:
         lb_repo = AsyncMock(spec=LeaderboardRepository)
         player_repo = AsyncMock(spec=PlayerRepository)
         now = datetime.now(UTC)
-        lb = Leaderboard(id=1, name="Global", created_at=now, updated_at=now)
+        lb = Leaderboard(
+            id=1,
+            external_leaderboard_id="global-id",
+            name="Global",
+            estimated_time_per_completion_minutes=30,
+            group_size=1,
+            created_at=now,
+            updated_at=now,
+        )
         created_snap = LeaderboardSnapshot(
-            id=42, leaderboard_id=1, fetched_at=now, entries=[]
+            id=42,
+            leaderboard_id=1,
+            fetched_at=now,
+            entries=[
+                LeaderboardEntry(rank=1, player_name="Alice", value=100),
+                LeaderboardEntry(rank=2, player_name="Bob", value=80),
+            ],
         )
         player = Player(id=1, name="Alice")
 
-        lb_repo.upsert_leaderboard.return_value = lb
+        lb_repo.get_leaderboard_by_name.return_value = lb
         lb_repo.create_snapshot.return_value = created_snap
         player_repo.upsert_player.return_value = player
 
@@ -167,7 +200,7 @@ class TestCreateSnapshotUseCase:
         res = await use_case.execute(req)
 
         assert res.snapshot_ids == [42]
-        lb_repo.upsert_leaderboard.assert_awaited_once_with("Global")
+        lb_repo.get_leaderboard_by_name.assert_awaited_once_with("Global")
         lb_repo.create_snapshot.assert_awaited_once()
         assert player_repo.upsert_player.await_count == 2
         uow.commit.assert_awaited_once()
