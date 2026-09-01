@@ -66,6 +66,7 @@ def upgrade() -> None:
         ('Aurora Defeats (Caches Claimed)', 'Aurora', 4, 4),
         ('Hexfall - Hycenea Defeats', 'Hexfall' , 5, 4),
         ('SKT Savage Mode Clears', 'Silver Knights Tomb', 8, 4),
+        ('Godspore Clears', 'Godspore', 4, 4)
         ('Portal', 'Portal', 2, 4),
         ('MasqueradersRuin', 'Masqueraders Ruin', 7, 6),
         ('Combat Remnants Looted', 'Silver Knight Remnants (Combat)', 6, 1),
