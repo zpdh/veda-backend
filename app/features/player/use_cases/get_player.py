@@ -47,10 +47,17 @@ class GetPlayer:
             )
             for entry in entry_rows
         ]
+
         total_comps = sum(entry.value for entry in entries)
+        total_playtime_minutes = sum(
+            entry.estimated_playtime_minutes for entry in entries
+        )
 
         response = PlayerResponse(
-            username=player.name, totalCompletions=total_comps, entries=entries
+            username=player.name,
+            totalCompletions=total_comps,
+            totalPlaytimeMinutes=total_playtime_minutes,
+            entries=entries,
         )
 
         _ = await self._redis.set(

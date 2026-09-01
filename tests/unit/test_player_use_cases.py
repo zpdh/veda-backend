@@ -40,6 +40,7 @@ class TestGetPlayerUseCase:
         cached_dto = PlayerResponse(
             username="Alice",
             totalCompletions=100,
+            totalPlaytimeMinutes=200,
             entries=[
                 {
                     "leaderboardName": "Global",

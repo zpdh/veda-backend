@@ -23,6 +23,7 @@ class PlayerEntryOut(BaseModel):
 class PlayerResponse(BaseModel):
     username: PlayerUsername
     total_completions: int = Field(alias="totalCompletions")
+    total_playtime_minutes: int = Field(alias="totalPlaytimeMinutes")
     entries: list[PlayerEntryOut]
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
