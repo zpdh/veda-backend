@@ -46,7 +46,12 @@ class TestPlayerEndpoints:
         player = Player(id=1, name="Alice")
         mock_repo.get_by_name.return_value = player
         mock_repo.get_player_entries.return_value = [
-            PlayerEntryRow(leaderboard_name="Global", rank=1, value=100)
+            PlayerEntryRow(
+                leaderboard_name="Global",
+                rank=1,
+                value=100,
+                estimated_time_per_completion_minutes=2,
+            )
         ]
 
         app.dependency_overrides[get_player_repository] = lambda: mock_repo
@@ -60,6 +65,7 @@ class TestPlayerEndpoints:
             assert data["entries"][0]["leaderboardName"] == "Global"
             assert data["entries"][0]["rank"] == 1
             assert data["entries"][0]["value"] == 100
+            assert data["entries"][0]["estimatedPlaytimeMinutes"] == 200
         finally:
             app.dependency_overrides.clear()
 

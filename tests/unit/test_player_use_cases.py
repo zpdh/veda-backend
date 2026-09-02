@@ -40,7 +40,15 @@ class TestGetPlayerUseCase:
         cached_dto = PlayerResponse(
             username="Alice",
             totalCompletions=100,
-            entries=[{"leaderboardName": "Global", "rank": 1, "value": 100}],
+            totalPlaytimeMinutes=200,
+            entries=[
+                {
+                    "leaderboardName": "Global",
+                    "rank": 1,
+                    "value": 100,
+                    "estimatedPlaytimeMinutes": 200,
+                }
+            ],
         )
         redis.get = AsyncMock(return_value=cached_dto.model_dump_json(by_alias=True))
 
@@ -73,8 +81,18 @@ class TestGetPlayerUseCase:
         player = Player(id=1, name="Alice")
         player_repo.get_by_name.return_value = player
         player_repo.get_player_entries.return_value = [
-            PlayerEntryRow(leaderboard_name="Global", rank=1, value=50),
-            PlayerEntryRow(leaderboard_name="Weekly", rank=3, value=25),
+            PlayerEntryRow(
+                leaderboard_name="Global",
+                rank=1,
+                value=50,
+                estimated_time_per_completion_minutes=4,
+            ),
+            PlayerEntryRow(
+                leaderboard_name="Weekly",
+                rank=3,
+                value=25,
+                estimated_time_per_completion_minutes=6,
+            ),
         ]
 
         use_case = GetPlayer(player_repo=player_repo, redis=redis)

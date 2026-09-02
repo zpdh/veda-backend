@@ -25,17 +25,25 @@ class TestBatchAtomicity:
         player_repo = AsyncMock(spec=PlayerRepository)
         now = datetime.now(UTC)
 
-        lb1 = Leaderboard(id=1, name="Global", created_at=now, updated_at=now)
+        lb1 = Leaderboard(
+            id=1,
+            external_leaderboard_id="global-id",
+            name="Global",
+            estimated_time_per_completion_minutes=30,
+            group_size=1,
+            created_at=now,
+            updated_at=now,
+        )
         snap1 = LeaderboardSnapshot(
             id=10, leaderboard_id=1, fetched_at=now, entries=[]
         )
         player = Player(id=1, name="Alice")
 
-        lb_repo.upsert_leaderboard.side_effect = [
+        lb_repo.get_leaderboard_by_name.side_effect = [
             lb1,
             RuntimeError("DB error during 2nd leaderboard"),
         ]
-        lb_repo.create_snapshot.side_effect = [snap1]
+        lb_repo.create_snapshot.return_value = snap1
         player_repo.upsert_player.return_value = player
 
         use_case = CreateSnapshot(

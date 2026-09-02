@@ -4,13 +4,13 @@ from app.core.security.auth import verify_auth_token
 from app.core.security.rate_limiter import limiter
 from app.features.leaderboard.dto.request import CreateSnapshotRequest
 from app.features.leaderboard.dto.response import (
-    LeaderboardNamesResponse,
+    LeaderboardsResponse,
     SnapshotCreatedResponse,
     SnapshotResponse,
 )
 from app.features.leaderboard.use_cases.create_snapshot import CreateSnapshot
 from app.features.leaderboard.use_cases.get_latest_snapshot import GetLatestSnapshot
-from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboardNames
+from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboards
 from app.core.constants import API_ROUTE_PREFIX, LIMITER_HTTP_GET, LIMITER_HTTP_POST
 
 leaderboard_router = APIRouter(
@@ -20,9 +20,9 @@ leaderboard_router = APIRouter(
 
 @leaderboard_router.get("")
 @limiter.limit(LIMITER_HTTP_GET)
-async def get_leaderboard_names(
-    request: Request, use_case: GetLeaderboardNames = Depends()
-) -> LeaderboardNamesResponse:
+async def get_leaderboards(
+    request: Request, use_case: GetLeaderboards = Depends()
+) -> LeaderboardsResponse:
     return await use_case.execute()
 
 

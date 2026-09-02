@@ -33,8 +33,7 @@ class TestLeaderboardEndpoints:
             res = await client.get(f"{API_ROUTE_PREFIX}/leaderboards")
             assert res.status_code == 200
             data = res.json()
-            assert "leaderboardNames" in data
-            assert data["leaderboardNames"] == []
+            assert data["leaderboards"] == []
         finally:
             app.dependency_overrides.clear()
 
@@ -43,13 +42,19 @@ class TestLeaderboardEndpoints:
         mock_repo.get_leaderboards.return_value = [
             Leaderboard(
                 id=1,
+                external_leaderboard_id="global-id",
                 name="Global",
+                estimated_time_per_completion_minutes=30,
+                group_size=1,
                 created_at=datetime.now(UTC),
                 updated_at=datetime.now(UTC),
             ),
             Leaderboard(
                 id=2,
+                external_leaderboard_id="weekly-id",
                 name="Weekly",
+                estimated_time_per_completion_minutes=45,
+                group_size=1,
                 created_at=datetime.now(UTC),
                 updated_at=datetime.now(UTC),
             ),
@@ -60,7 +65,18 @@ class TestLeaderboardEndpoints:
             res = await client.get(f"{API_ROUTE_PREFIX}/leaderboards")
             assert res.status_code == 200
             data = res.json()
-            assert data["leaderboardNames"] == ["Global", "Weekly"]
+            assert data["leaderboards"] == [
+                {
+                    "leaderboardId": "global-id",
+                    "leaderboardName": "Global",
+                    "estimatedTimePerCompletionMinutes": 30,
+                },
+                {
+                    "leaderboardId": "weekly-id",
+                    "leaderboardName": "Weekly",
+                    "estimatedTimePerCompletionMinutes": 45,
+                },
+            ]
         finally:
             app.dependency_overrides.clear()
 
