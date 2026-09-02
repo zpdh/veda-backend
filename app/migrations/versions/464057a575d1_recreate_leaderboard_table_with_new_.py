@@ -20,7 +20,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    downgrade()  ############################################## REMOVE THIS AFTER DEPLOY ##############################################
     op.create_table(
         "leaderboard",
         sa.Column("id", sa.BigInteger(), nullable=False),
@@ -61,16 +60,17 @@ def upgrade() -> None:
     op.execute("""
         INSERT INTO leaderboard (external_leaderboard_id, name, estimated_time_per_completion_minutes, group_size)
         VALUES
-        ('Zenith Clears', 'Celestial Zenith', 15, 4),
-        ('Twisted lxxxxxxx Wins', 'Twisted Intruder', 5, 2),
-        ('Aurora Defeats (Caches Claimed)', 'Aurora', 4, 4),
-        ('Hexfall - Hycenea Defeats', 'Hexfall' , 8, 4),
-        ('SKT Savage Mode Clears', 'Silver Knights Tomb', 15, 4),
-        ('Godspore Clears', 'Godspore', 4, 4),
+        ('Zenith', 'Celestial Zenith', 15, 4),
+        ('TwistedXWins', 'Twisted Intruder', 5, 2),
+        ('Aurora', 'Aurora', 4, 4),
+        ('Hexfall', 'Hexfall' , 8, 4),
+        ('SKT', 'Silver Knights Tomb (Normal)', 4, 4),
+        ('SKTH', 'Silver Knights Tomb (Savage)', 15, 4),
+        ('GodsporeWins', 'Godspore', 4, 4),
         ('Portal', 'Portal', 3, 4),
         ('MasqueradersRuin', 'Masqueraders Ruin', 8, 6),
-        ('Combat Remnants Looted', 'Silver Knight Remnants (Combat)', 4, 1),
-        ('Puzzle Remnants Looted', 'Silver Knight Remnants (Puzzle)', 4, 1)
+        ('SKRCombatRooms', 'Silver Knight Remnants (Combat)', 4, 1),
+        ('SKRPuzzleRooms', 'Silver Knight Remnants (Puzzle)', 4, 1)
         """)
 
 
