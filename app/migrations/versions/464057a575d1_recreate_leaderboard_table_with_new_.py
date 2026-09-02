@@ -20,6 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    downgrade()
     op.create_table(
         "leaderboard",
         sa.Column("id", sa.BigInteger(), nullable=False),
