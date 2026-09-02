@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.core.constants import LEADERBOARD_NAME_PATTERN, PLAYER_USERNAME_PATTERN
+from app.core.constants import PLAYER_USERNAME_PATTERN
 from app.features.leaderboard.errors.errors import (
     LeaderboardError,
     LeaderboardErrors,
@@ -23,12 +23,7 @@ class EntryIn(BaseModel):
 
 
 class LeaderboardSnapshotIn(BaseModel):
-    leaderboard_name: str = Field(
-        alias="leaderboardName",
-        min_length=1,
-        max_length=128,
-        pattern=LEADERBOARD_NAME_PATTERN,
-    )
+    leaderboard_name: str = Field(alias="leaderboardName", min_length=1, max_length=128)
     entries: list[EntryIn] = Field(alias="entries", min_length=1)
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
