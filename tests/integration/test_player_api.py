@@ -51,6 +51,7 @@ class TestPlayerEndpoints:
                 rank=1,
                 value=100,
                 estimated_time_per_completion_minutes=2,
+                group_size=100,
             )
         ]
 
