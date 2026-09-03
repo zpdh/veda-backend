@@ -37,3 +37,13 @@ class AllPlayersResponse(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )
+
+
+class PlayerAchievementsResponse(BaseModel):
+    username: str
+    achievement_count: int = Field(alias="achievementCount")
+    achievement_count_total: int = Field(alias="achievementCountTotal")
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
+    )
