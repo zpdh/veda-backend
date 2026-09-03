@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, Request, Security
+from fastapi import APIRouter, Depends, Request, Security
 
 from app.core.security.auth import verify_auth_token
 from app.core.security.rate_limiter import limiter

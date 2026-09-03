@@ -1,7 +1,7 @@
 from fastapi import Depends
 from redis.asyncio.client import Redis
 
-from app.core.constants import CACHE_TTL_SECONDS_LONG, CACHE_TTL_SECONDS_SHORT
+from app.core.constants import CACHE_TTL_SECONDS_SHORT
 from app.core.db.cache import get_redis
 from app.features.player.dto.response import PlayerAchievementsResponse
 from app.features.player.external.monumenta_client import (
