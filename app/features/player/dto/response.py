@@ -1,6 +1,6 @@
 from typing import Annotated, ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from app.core.constants import PLAYER_USERNAME_PATTERN
 
@@ -30,6 +30,10 @@ class PlayerResponse(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
     )
+
+    @field_serializer("weight")
+    def serialize_weight(self, value: float) -> float:
+        return round(value, 2)
 
 
 class AllPlayersResponse(BaseModel):

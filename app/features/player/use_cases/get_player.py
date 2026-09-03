@@ -85,9 +85,7 @@ class GetPlayer:
             WeightedEntry(
                 entry.rank,
                 entry.estimated_time_per_completion_minutes * entry.value,
-                calculate_leaderboard_weight(
-                    entry.group_size, entry.estimated_time_per_completion_minutes
-                ),
+                calculate_leaderboard_weight(entry.group_size),
             )
             for entry in player_entries
         ]
