@@ -13,18 +13,14 @@ class WeightedEntry:
 
 def calculate_player_weight(entries: list[WeightedEntry]) -> float:
     raw_score = sum(
-        entry.playtime_minutes * entry.leaderboard_weight * get_rank_factor(entry.rank)
+        entry.playtime_minutes * entry.leaderboard_weight * _get_rank_factor(entry.rank)
         for entry in entries
     )
 
     playtimes = [entry.playtime_minutes for entry in entries]
-    d_coeff = calculate_diversification_coeff(playtimes)
+    d_coeff = _calculate_diversification_coeff(playtimes)
 
     return raw_score * d_coeff
-
-
-def get_rank_factor(rank: int) -> float:
-    return _RANK_BOOSTS.get(rank, 0.0) + 1
 
 
 def calculate_leaderboard_weight(
@@ -33,7 +29,11 @@ def calculate_leaderboard_weight(
     return (_WEIGHT_INDEX * group_size) / estimated_time_per_completion_minutes
 
 
-def calculate_diversification_coeff(playtimes: list[int]) -> float:
+def _get_rank_factor(rank: int) -> float:
+    return _RANK_BOOSTS.get(rank, 0.0) + 1
+
+
+def _calculate_diversification_coeff(playtimes: list[int]) -> float:
     # https://wikipedia.org/wiki/Herfindahl%E2%80%93Hirschman_index
     n = len(playtimes)
     if n <= 1:
