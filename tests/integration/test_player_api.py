@@ -22,7 +22,7 @@ class TestPlayerEndpoints:
 
         app.dependency_overrides[get_player_repository] = lambda: mock_repo
         try:
-            res = await client.get(f"{API_ROUTE_PREFIX}/players/")
+            res = await client.get(f"{API_ROUTE_PREFIX}/players")
             assert res.status_code == 200
             assert res.json() == {"players": ["Alice", "Bob"]}
             mock_repo.get_all.assert_awaited_once()
@@ -35,7 +35,7 @@ class TestPlayerEndpoints:
 
         app.dependency_overrides[get_player_repository] = lambda: mock_repo
         try:
-            res = await client.get(f"{API_ROUTE_PREFIX}/players/")
+            res = await client.get(f"{API_ROUTE_PREFIX}/players")
             assert res.status_code == 200
             assert res.json() == {"players": []}
         finally:
@@ -51,6 +51,7 @@ class TestPlayerEndpoints:
                 rank=1,
                 value=100,
                 estimated_time_per_completion_minutes=2,
+                group_size=100,
             )
         ]
 

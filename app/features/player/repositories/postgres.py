@@ -20,6 +20,7 @@ class PlayerEntryRow:
     rank: int
     value: int
     estimated_time_per_completion_minutes: int
+    group_size: int
 
 class PlayerRepository:
     def __init__(self, session: AsyncSession) -> None:
@@ -66,7 +67,8 @@ class PlayerRepository:
                 Leaderboard.name.label("leaderboard_name"),
                 LeaderboardEntry.rank,
                 LeaderboardEntry.value,
-                Leaderboard.estimated_time_per_completion_minutes
+                Leaderboard.estimated_time_per_completion_minutes,
+                Leaderboard.group_size
             )
             .distinct(Leaderboard.name)
             .select_from(LeaderboardEntry)

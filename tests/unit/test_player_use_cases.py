@@ -39,6 +39,7 @@ class TestGetPlayerUseCase:
         redis = AsyncMock()
         cached_dto = PlayerResponse(
             username="Alice",
+            weight=1.0,
             totalCompletions=100,
             totalPlaytimeMinutes=200,
             entries=[
@@ -86,12 +87,14 @@ class TestGetPlayerUseCase:
                 rank=1,
                 value=50,
                 estimated_time_per_completion_minutes=4,
+                group_size=100,
             ),
             PlayerEntryRow(
                 leaderboard_name="Weekly",
                 rank=3,
                 value=25,
                 estimated_time_per_completion_minutes=6,
+                group_size=100,
             ),
         ]
 

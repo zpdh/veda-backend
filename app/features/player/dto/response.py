@@ -22,6 +22,7 @@ class PlayerEntryOut(BaseModel):
 
 class PlayerResponse(BaseModel):
     username: PlayerUsername
+    weight: float
     total_completions: int = Field(alias="totalCompletions")
     total_playtime_minutes: int = Field(alias="totalPlaytimeMinutes")
     entries: list[PlayerEntryOut]
@@ -33,6 +34,16 @@ class PlayerResponse(BaseModel):
 
 class AllPlayersResponse(BaseModel):
     players: list[PlayerUsername]
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
+    )
+
+
+class PlayerAchievementsResponse(BaseModel):
+    username: str
+    achievement_count: int = Field(alias="achievementCount")
+    achievement_count_total: int = Field(alias="achievementCountTotal")
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True

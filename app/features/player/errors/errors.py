@@ -5,6 +5,7 @@ from app.core.errors import AppError, ErrorDescription
 
 class PlayerErrors(Enum):
     PLAYER_NOT_FOUND = ErrorDescription(404, "ERR_PLAYER_NOT_FOUND")
+    ACHIEVEMENTS_UNAVAILABLE = ErrorDescription(502, "ERR_ACHIEVEMENTS_UNAVAILABLE")
 
 
 class PlayerError(AppError):
