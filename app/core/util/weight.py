@@ -37,6 +37,10 @@ def _get_rank_factor(rank: int) -> float:
 
 
 def _get_effective_playtime(playtime_minutes: int) -> float:
+    # My approach mixes exponential decay & linear growth. Learn more:
+    # https://en.wikipedia.org/wiki/Exponential_decay
+    # https://en.wikipedia.org/wiki/Segmented_regression
+    # https://en.wikipedia.org/wiki/Asymptote
     hours = playtime_minutes / 60.0
 
     return _DECAY_FLOOR * hours + (1 - _DECAY_FLOOR) * _DECAY_THRESHOLD_HOURS * (
@@ -45,6 +49,7 @@ def _get_effective_playtime(playtime_minutes: int) -> float:
 
 
 def _calculate_diversification_coeff(playtimes: list[int]) -> float:
+    # Normalized HHI.
     # https://wikipedia.org/wiki/Herfindahl%E2%80%93Hirschman_index
     n = len(playtimes)
     if n <= 1:
