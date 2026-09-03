@@ -1,7 +1,7 @@
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from app.core.constants import CACHE_TTL_SECONDS
+from app.core.constants import CACHE_TTL_SECONDS_LONG
 from app.core.db.cache import get_redis
 from app.features.player.dto.response import PlayerEntryOut, PlayerResponse
 from app.features.player.entities.orm import Player
@@ -39,7 +39,7 @@ class GetPlayer:
         response = await self._build_player_response(player)
 
         _ = await self._redis.set(
-            cache_key, response.model_dump_json(by_alias=True), ex=CACHE_TTL_SECONDS
+            cache_key, response.model_dump_json(by_alias=True), ex=CACHE_TTL_SECONDS_LONG
         )
 
         return response
