@@ -2,7 +2,7 @@ import math
 from dataclasses import dataclass
 
 _RANK_BOOSTS = {1: 0.06, 2: 0.04, 3: 0.02}
-_WEIGHT_INDEX = 5.0
+_WEIGHT_INDEX = 15.0
 _DECAY_FLOOR = 0.75
 _DECAY_THRESHOLD_HOURS = 175
 
@@ -29,7 +29,7 @@ def calculate_player_weight(entries: list[WeightedEntry]) -> float:
 
 
 def calculate_leaderboard_weight(group_size: int) -> float:
-    return _WEIGHT_INDEX * group_size
+    return _WEIGHT_INDEX * (group_size / 4) ** 0.5  # pyright: ignore[reportAny]
 
 
 def _get_rank_factor(rank: int) -> float:
