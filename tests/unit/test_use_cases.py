@@ -180,7 +180,7 @@ class TestCreateSnapshotUseCase:
 
         lb_repo.get_leaderboard_by_name.return_value = lb
         lb_repo.create_snapshot.return_value = created_snap
-        player_repo.upsert_player.return_value = player
+        player_repo.bulk_upsert_players.return_value = None
 
         use_case = CreateSnapshot(
             uow=uow, redis=redis, lb_repo=lb_repo, player_repo=player_repo
@@ -202,6 +202,6 @@ class TestCreateSnapshotUseCase:
         assert res.snapshot_ids == [42]
         lb_repo.get_leaderboard_by_name.assert_awaited_once_with("Global")
         lb_repo.create_snapshot.assert_awaited_once()
-        assert player_repo.upsert_player.await_count == 2
+        player_repo.bulk_upsert_players.assert_awaited_once_with({"Alice", "Bob"})
         uow.commit.assert_awaited_once()
-        assert redis.delete.await_count == 2
+        redis.delete.assert_awaited_once()
