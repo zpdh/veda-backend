@@ -13,6 +13,7 @@ from app.core.errors import (
     error_handler,
     rate_limit_handler,
 )
+from app.core.http import close_http_connection
 from app.core.security import rate_limiter
 from app.features.leaderboard.api.router import leaderboard_router
 from app.features.player.api.router import player_router
@@ -22,6 +23,7 @@ from app.features.player.api.router import player_router
 async def lifespan(app: FastAPI):
     yield
     await close_redis()
+    await close_http_connection()
 
 
 app = FastAPI(title="Veda", version="1.0", lifespan=lifespan)
