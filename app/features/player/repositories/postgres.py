@@ -22,6 +22,7 @@ class PlayerEntryRow:
     estimated_time_per_completion_minutes: int
     group_size: int
 
+
 class PlayerRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session: AsyncSession = session
@@ -61,6 +62,18 @@ class PlayerRepository:
 
         return player
 
+    async def bulk_upsert_players(self, player_names: set[str]) -> None:
+        if not player_names:
+            return
+
+        command = (
+            pg_insert(Player)
+            .values([{"name": name} for name in player_names])
+            .on_conflict_do_nothing(index_elements=["name"])
+        )
+
+        _ = await self._session.execute(command)
+
     async def get_player_entries(self, player_name: str) -> list[PlayerEntryRow]:
         query = (
             select(
@@ -68,7 +81,7 @@ class PlayerRepository:
                 LeaderboardEntry.rank,
                 LeaderboardEntry.value,
                 Leaderboard.estimated_time_per_completion_minutes,
-                Leaderboard.group_size
+                Leaderboard.group_size,
             )
             .distinct(Leaderboard.name)
             .select_from(LeaderboardEntry)

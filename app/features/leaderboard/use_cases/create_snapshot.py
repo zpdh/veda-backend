@@ -38,14 +38,19 @@ class CreateSnapshot:
     async def execute(self, req: CreateSnapshotRequest) -> SnapshotCreatedResponse:
         created_snapshot_ids: list[int] = []
         fetched_at = datetime.now(UTC)
-        unique_names: set[str] = set()
 
         for snapshot_in in req.snapshots:
             created_snapshot = await self._create_snapshot(snapshot_in, fetched_at)
             created_snapshot_ids.append(created_snapshot.id)
 
-            created_players = await self._upsert_players(created_snapshot)
-            unique_names.update(created_players)
+        unique_names = {
+            entry.player_name
+            for snapshot in req.snapshots
+            for entry in snapshot.entries
+        }
+
+        if unique_names:
+            await self._player_repo.bulk_upsert_players(unique_names)
 
         await self._unit_of_work.commit()
 
@@ -91,11 +96,3 @@ class CreateSnapshot:
         )
 
         return created_snapshot
-
-    async def _upsert_players(self, snapshot: LeaderboardSnapshot) -> set[str]:
-        unique_names = set(entry.player_name for entry in snapshot.entries)
-
-        for name in unique_names:
-            _ = await self._player_repo.upsert_player(name)
-
-        return unique_names
