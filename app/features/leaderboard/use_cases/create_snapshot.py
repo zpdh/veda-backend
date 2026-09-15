@@ -49,8 +49,9 @@ class CreateSnapshot:
 
         await self._unit_of_work.commit()
 
-        for name in unique_names:
-            _ = await self._redis.delete(f"player:{name.lower()}")
+        _ = await self._redis.delete(
+            *[f"player:{name.lower()}" for name in unique_names]
+        )
 
         return SnapshotCreatedResponse(
             snapshotIds=created_snapshot_ids,
