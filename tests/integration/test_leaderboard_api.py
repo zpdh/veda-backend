@@ -155,9 +155,9 @@ class TestLeaderboardEndpoints:
         )
         player = Player(id=1, name="Alice")
 
-        mock_lb_repo.upsert_leaderboard.return_value = lb
+        mock_lb_repo.get_leaderboard_by_name.return_value = lb
         mock_lb_repo.create_snapshot.return_value = created_snap
-        mock_player_repo.upsert_player.return_value = player
+        mock_player_repo.bulk_upsert_players.return_value = None
 
         app.dependency_overrides[get_leaderboard_repository] = lambda: mock_lb_repo
         app.dependency_overrides[get_player_repository] = lambda: mock_player_repo

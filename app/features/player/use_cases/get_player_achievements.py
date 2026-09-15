@@ -46,7 +46,7 @@ class GetPlayerAchievements:
             for entry in data.values()
             if isinstance(entry, dict) and entry.get("done") is True
         )
-        total_ach_count = 1352 # No api to get this, max obtainable achievements by 04/09/26
+        total_ach_count = 1362 # No api to get this, max obtainable achievements by 04/09/26
         response = PlayerAchievementsResponse(
             username=username,
             achievementCount=ach_count,

@@ -1,18 +1,20 @@
 from typing import Any
 
 import httpx
+from fastapi import Depends
 
+from app.core.http import get_http_client
 from app.features.player.errors.errors import PlayerError, PlayerErrors
 
 MONUMENTA_API_URL = "https://api.playmonumenta.com/advancement/{username}"
 
 
 class MonumentaClient:
-    async def get_player_achievements(self, username: str) -> Any:  # pyright: ignore[reportAny]
-        async with httpx.AsyncClient(
-            timeout=15.0
-        ) as client:  # refactor to shared client if we use this any more
-            response = await client.get(MONUMENTA_API_URL.format(username=username))
+    def __init__(self, http_client: httpx.AsyncClient) -> None:
+        self.http: httpx.AsyncClient = http_client
+
+    async def get_player_achievements(self, username: str) -> Any:  # pyright: ignore[reportAny, reportExplicitAny]
+        response = await self.http.get(MONUMENTA_API_URL.format(username=username))
 
         if response.status_code != 200:
             raise PlayerError(
@@ -23,5 +25,7 @@ class MonumentaClient:
         return response.json()  # pyright: ignore[reportAny]
 
 
-def get_monumenta_client() -> MonumentaClient:
-    return MonumentaClient()
+def get_monumenta_client(
+    http_client: httpx.AsyncClient = Depends(get_http_client),
+) -> MonumentaClient:
+    return MonumentaClient(http_client)

@@ -2,7 +2,6 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import Depends
 from sqlalchemy import delete, func, select
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -19,29 +18,6 @@ class LeaderboardRepository:
         result = await self._session.execute(query)
 
         return result.scalar_one_or_none()
-
-    async def upsert_leaderboard(self, name: str) -> Leaderboard:
-        lb = await self.get_leaderboard_by_name(name)
-        if lb:
-            return lb
-
-        command = (
-            pg_insert(Leaderboard)
-            .values(name=name)
-            .on_conflict_do_nothing(index_elements=["name"])
-            .returning(Leaderboard)
-        )
-
-        result = await self._session.execute(command)
-
-        lb = result.scalar_one_or_none()
-        if lb:
-            return lb
-
-        lb = await self.get_leaderboard_by_name(name)
-        assert lb is not None, "leaderboard still missing after race resolution"
-
-        return lb
 
     async def get_latest_snapshot(
         self, leaderboard_id: int
