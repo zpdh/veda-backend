@@ -40,7 +40,7 @@ def downgrade() -> None:
         "idx_leaderboard_entry_player_name_lower",
         table_name="leaderboard_entry",
     )
-    op.drop_column(
+    op.drop_index(
         "idx_leaderboard_snapshot_leaderboard_id_latest",
         "leaderboard_snapshot",
     )
