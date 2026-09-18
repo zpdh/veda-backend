@@ -81,9 +81,10 @@ class TestGetPlayerUseCase:
         redis.set = AsyncMock(return_value=True)
         player = Player(id=1, name="Alice")
         player_repo.get_by_name.return_value = player
-        player_repo.get_player_entries.return_value = [
+        player_repo.get_entries_for.return_value = [
             PlayerEntryRow(
                 leaderboard_name="Global",
+                player_name=player.name,
                 rank=1,
                 value=50,
                 estimated_time_per_completion_minutes=4,
@@ -91,6 +92,7 @@ class TestGetPlayerUseCase:
             ),
             PlayerEntryRow(
                 leaderboard_name="Weekly",
+                player_name=player.name,
                 rank=3,
                 value=25,
                 estimated_time_per_completion_minutes=6,

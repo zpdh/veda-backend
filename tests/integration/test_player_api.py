@@ -45,9 +45,10 @@ class TestPlayerEndpoints:
         mock_repo = AsyncMock(spec=PlayerRepository)
         player = Player(id=1, name="Alice")
         mock_repo.get_by_name.return_value = player
-        mock_repo.get_player_entries.return_value = [
+        mock_repo.get_entries_for.return_value = [
             PlayerEntryRow(
                 leaderboard_name="Global",
+                player_name=player.name,
                 rank=1,
                 value=100,
                 estimated_time_per_completion_minutes=2,
