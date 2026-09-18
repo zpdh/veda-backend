@@ -46,7 +46,7 @@ class CreateSnapshot:
             unique_names.update(entry.player_name for entry in created_snapshot.entries)
 
         if unique_names:
-            await self._player_repo.bulk_upsert_players(unique_names)
+            await self._player_repo.upsert_many(unique_names)
 
         await self._unit_of_work.commit()
 

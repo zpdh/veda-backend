@@ -40,41 +40,6 @@ class PlayerRepository:
 
         return result.scalar_one_or_none()
 
-    async def upsert_player(self, player_name: str) -> Player:
-        player = await self.get_by_name(player_name)
-
-        if player:
-            return player
-
-        command = (
-            pg_insert(Player)
-            .values(name=player_name)
-            .on_conflict_do_nothing(index_elements=["name"])
-            .returning(Player)
-        )
-
-        result = await self._session.execute(command)
-        player = result.scalar_one_or_none()
-        if player:
-            return player
-
-        player = await self.get_by_name(player_name)
-        assert player is not None, "player still missing after race resolution"
-
-        return player
-
-    async def bulk_upsert_players(self, player_names: set[str]) -> None:
-        if not player_names:
-            return
-
-        command = (
-            pg_insert(Player)
-            .values([{"name": name} for name in player_names])
-            .on_conflict_do_nothing(index_elements=["name"])
-        )
-
-        _ = await self._session.execute(command)
-
     async def get_entries_for(self, player_name: str) -> list[PlayerEntryRow]:
         query = (
             select(
@@ -134,6 +99,54 @@ class PlayerRepository:
         result = await self._session.execute(query)
 
         return [PlayerEntryRow(**entry) for entry in result.mappings()]  # pyright: ignore[reportAny]
+
+    async def update_weights_for_many(self, players: dict[str, float]) -> None:
+        if not players:
+            return
+
+        insert = pg_insert(Player).values(
+            [{"name": name, "weight": weight} for name, weight in players.items()]
+        )
+        command = insert.on_conflict_do_update(
+            index_elements=["name"], set_={"weight": insert.excluded.weight}
+        )
+
+        _ = await self._session.execute(command)
+
+    async def upsert(self, player_name: str) -> Player:
+        player = await self.get_by_name(player_name)
+
+        if player:
+            return player
+
+        command = (
+            pg_insert(Player)
+            .values(name=player_name)
+            .on_conflict_do_nothing(index_elements=["name"])
+            .returning(Player)
+        )
+
+        result = await self._session.execute(command)
+        player = result.scalar_one_or_none()
+        if player:
+            return player
+
+        player = await self.get_by_name(player_name)
+        assert player is not None, "player still missing after race resolution"
+
+        return player
+
+    async def upsert_many(self, player_names: set[str]) -> None:
+        if not player_names:
+            return
+
+        command = (
+            pg_insert(Player)
+            .values([{"name": name} for name in player_names])
+            .on_conflict_do_nothing(index_elements=["name"])
+        )
+
+        _ = await self._session.execute(command)
 
 
 def get_player_repository(
