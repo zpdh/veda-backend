@@ -28,5 +28,5 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_column("player", "weight")
     op.drop_index("idx_player_weight", "player")
+    op.drop_column("player", "weight")
