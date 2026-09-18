@@ -65,7 +65,7 @@ def _calculate_leaderboard_weight(group_size: int) -> float:
 
 
 def _calculate_rank_factor(rank: int) -> float:
-    return _WEIGHT_CONFIG.rank_boosts.get(rank, 0.0)
+    return _WEIGHT_CONFIG.rank_boosts.get(rank, 0.0) + 1
 
 
 def _calculate_effective_playtime(playtime_minutes: int) -> float:
@@ -77,7 +77,7 @@ def _calculate_effective_playtime(playtime_minutes: int) -> float:
     decay_floor = _WEIGHT_CONFIG.decay_floor
     decay_threshold = _WEIGHT_CONFIG.decay_threshold_hours
 
-    linear_comp = decay_floor / hours
+    linear_comp = decay_floor * hours
     exp_comp = (
         (1.0 - decay_floor)
         * decay_threshold
