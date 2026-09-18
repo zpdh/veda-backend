@@ -1,5 +1,5 @@
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -8,7 +8,9 @@ class WeightConfig:
     decay_floor: float = 0.75
     diversification_max_penalty: float = 0.3
     decay_threshold_hours: int = 175
-    rank_boosts: dict[int, float] = {1: 0.06, 2: 0.04, 3: 0.02}
+    rank_boosts: dict[int, float] = field(
+        default_factory=lambda: {1: 0.06, 2: 0.04, 3: 0.02}
+    )
 
 
 @dataclass(frozen=True)
