@@ -51,7 +51,7 @@ class GetPlayer:
         return response
 
     async def _build_player_response(self, player: Player) -> PlayerResponse:
-        entry_rows = await self._player_repo.get_player_entries(player.name)
+        entry_rows = await self._player_repo.get_entries_for(player.name)
         entries = [
             PlayerEntryOut(
                 leaderboardName=entry.leaderboard_name,
