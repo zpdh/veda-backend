@@ -4,15 +4,13 @@ from redis.asyncio import Redis
 from app.core.constants import CACHE_TTL_SECONDS_LONG
 from app.core.db.cache import get_redis
 from app.core.util.weight import (
-    WeightedEntry,
-    calculate_leaderboard_weight,
-    calculate_player_weight,
+    EntryRow,
+    calculate_weight_for_rows,
 )
 from app.features.player.dto.response import PlayerEntryOut, PlayerResponse
 from app.features.player.entities.orm import Player
 from app.features.player.errors.errors import PlayerError, PlayerErrors
 from app.features.player.repositories.postgres import (
-    PlayerEntryRow,
     PlayerRepository,
     get_player_repository,
 )
@@ -70,7 +68,17 @@ class GetPlayer:
             entry.estimated_playtime_minutes for entry in entries
         )
 
-        weight = self._calculate_weight(entry_rows)
+        weight = calculate_weight_for_rows(
+            [
+                EntryRow(
+                    entry.rank,
+                    entry.value,
+                    entry.estimated_time_per_completion_minutes,
+                    entry.group_size,
+                )
+                for entry in entry_rows
+            ]
+        )
 
         return PlayerResponse(
             username=player.name,
@@ -79,15 +87,3 @@ class GetPlayer:
             totalPlaytimeMinutes=total_playtime_minutes,
             entries=entries,
         )
-
-    def _calculate_weight(self, player_entries: list[PlayerEntryRow]) -> float:
-        lb_entries = [
-            WeightedEntry(
-                entry.rank,
-                entry.estimated_time_per_completion_minutes * entry.value,
-                calculate_leaderboard_weight(entry.group_size),
-            )
-            for entry in player_entries
-        ]
-
-        return calculate_player_weight(lb_entries)
