@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import UTC, datetime
 
 from fastapi import Depends
@@ -5,6 +6,7 @@ from redis.asyncio import Redis
 
 from app.core.db.cache import get_redis
 from app.core.db.unit_of_work import UnitOfWork, get_unit_of_work
+from app.core.util.weight import EntryRow, calculate_weight_for_rows
 from app.features.leaderboard.dto.request import (
     CreateSnapshotRequest,
     LeaderboardSnapshotIn,
@@ -47,6 +49,7 @@ class CreateSnapshot:
 
         if unique_names:
             await self._player_repo.upsert_many(unique_names)
+            await self._compute_weights(unique_names)
 
         await self._unit_of_work.commit()
 
@@ -92,3 +95,25 @@ class CreateSnapshot:
         )
 
         return created_snapshot
+
+    async def _compute_weights(self, players: set[str]) -> None:
+        rows = await self._player_repo.get_entries_for_many(players)
+
+        player_entries_map: dict[str, list[EntryRow]] = defaultdict(list)
+
+        for row in rows:
+            player_entries_map[row.player_name].append(
+                EntryRow(
+                    row.rank,
+                    row.value,
+                    row.estimated_time_per_completion_minutes,
+                    row.group_size,
+                )
+            )
+
+        player_weight_map = {
+            name: calculate_weight_for_rows(entries)
+            for name, entries in player_entries_map.items()
+        }
+
+        await self._player_repo.update_weights_for_many(player_weight_map)
