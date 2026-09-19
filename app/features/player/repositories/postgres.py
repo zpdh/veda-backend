@@ -148,6 +148,12 @@ class PlayerRepository:
 
         _ = await self._session.execute(command)
 
+    async def get_weight_leaderboard(self) -> list[Player]:
+        query = select(Player).order_by(Player.weight.desc(), Player.name.asc())
+        result = await self._session.execute(query)
+
+        return list(result.scalars().all())
+
 
 def get_player_repository(
     session: AsyncSession = Depends(get_db),

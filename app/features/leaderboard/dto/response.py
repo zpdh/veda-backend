@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class EntryOut(BaseModel):
@@ -50,6 +50,28 @@ class LeaderboardOut(BaseModel):
 
 class LeaderboardsResponse(BaseModel):
     leaderboards: list[LeaderboardOut]
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
+    )
+
+
+class WeightEntryOut(BaseModel):
+    rank: int
+    player_name: str = Field(alias="playerName")
+    weight: float
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
+    )
+
+    @field_serializer("weight")
+    def serialize_weight(self, value: float) -> float:
+        return round(value, 2)
+
+
+class WeightLeaderboardResponse(BaseModel):
+    entries: list[WeightEntryOut]
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
         validate_by_name=True, validate_by_alias=True, serialize_by_alias=True
