@@ -17,6 +17,7 @@ from app.features.player.entities.orm import Player
 @dataclass
 class PlayerEntryRow:
     leaderboard_name: str
+    player_name: str
     rank: int
     value: int
     estimated_time_per_completion_minutes: int
@@ -39,7 +40,80 @@ class PlayerRepository:
 
         return result.scalar_one_or_none()
 
-    async def upsert_player(self, player_name: str) -> Player:
+    async def get_entries_for(self, player_name: str) -> list[PlayerEntryRow]:
+        query = (
+            select(
+                Leaderboard.name.label("leaderboard_name"),
+                LeaderboardEntry.player_name,
+                LeaderboardEntry.rank,
+                LeaderboardEntry.value,
+                Leaderboard.estimated_time_per_completion_minutes,
+                Leaderboard.group_size,
+            )
+            .distinct(Leaderboard.name)
+            .select_from(LeaderboardEntry)
+            .join(
+                LeaderboardSnapshot,
+                LeaderboardSnapshot.id == LeaderboardEntry.snapshot_id,
+            )
+            .join(Leaderboard, Leaderboard.id == LeaderboardSnapshot.leaderboard_id)
+            .where(func.lower(LeaderboardEntry.player_name) == func.lower(player_name))
+            .order_by(Leaderboard.name, LeaderboardSnapshot.fetched_at.desc())
+        )
+
+        result = await self._session.execute(query)
+
+        return [PlayerEntryRow(**entry) for entry in result.mappings()]  # pyright: ignore[reportAny]
+
+    async def get_entries_for_many(
+        self, player_names: set[str]
+    ) -> list[PlayerEntryRow]:
+        query = (
+            select(
+                Leaderboard.name.label("leaderboard_name"),
+                LeaderboardEntry.player_name,
+                LeaderboardEntry.rank,
+                LeaderboardEntry.value,
+                Leaderboard.estimated_time_per_completion_minutes,
+                Leaderboard.group_size,
+            )
+            .distinct(Leaderboard.name, func.lower(LeaderboardEntry.player_name))
+            .select_from(LeaderboardEntry)
+            .join(
+                LeaderboardSnapshot,
+                LeaderboardSnapshot.id == LeaderboardEntry.snapshot_id,
+            )
+            .join(Leaderboard, Leaderboard.id == LeaderboardSnapshot.leaderboard_id)
+            .where(
+                func.lower(LeaderboardEntry.player_name).in_(
+                    [name.lower() for name in player_names]
+                )
+            )
+            .order_by(
+                Leaderboard.name,
+                func.lower(LeaderboardEntry.player_name),
+                LeaderboardSnapshot.fetched_at.desc(),
+            )
+        )
+
+        result = await self._session.execute(query)
+
+        return [PlayerEntryRow(**entry) for entry in result.mappings()]  # pyright: ignore[reportAny]
+
+    async def update_weights_for_many(self, players: dict[str, float]) -> None:
+        if not players:
+            return
+
+        insert = pg_insert(Player).values(
+            [{"name": name, "weight": weight} for name, weight in players.items()]
+        )
+        command = insert.on_conflict_do_update(
+            index_elements=["name"], set_={"weight": insert.excluded.weight}
+        )
+
+        _ = await self._session.execute(command)
+
+    async def upsert(self, player_name: str) -> Player:
         player = await self.get_by_name(player_name)
 
         if player:
@@ -62,7 +136,7 @@ class PlayerRepository:
 
         return player
 
-    async def bulk_upsert_players(self, player_names: set[str]) -> None:
+    async def upsert_many(self, player_names: set[str]) -> None:
         if not player_names:
             return
 
@@ -74,29 +148,11 @@ class PlayerRepository:
 
         _ = await self._session.execute(command)
 
-    async def get_player_entries(self, player_name: str) -> list[PlayerEntryRow]:
-        query = (
-            select(
-                Leaderboard.name.label("leaderboard_name"),
-                LeaderboardEntry.rank,
-                LeaderboardEntry.value,
-                Leaderboard.estimated_time_per_completion_minutes,
-                Leaderboard.group_size,
-            )
-            .distinct(Leaderboard.name)
-            .select_from(LeaderboardEntry)
-            .join(
-                LeaderboardSnapshot,
-                LeaderboardSnapshot.id == LeaderboardEntry.snapshot_id,
-            )
-            .join(Leaderboard, Leaderboard.id == LeaderboardSnapshot.leaderboard_id)
-            .where(func.lower(LeaderboardEntry.player_name) == func.lower(player_name))
-            .order_by(Leaderboard.name, LeaderboardSnapshot.fetched_at.desc())
-        )
-
+    async def get_weight_leaderboard(self) -> list[Player]:
+        query = select(Player).order_by(Player.weight.desc(), Player.name.asc())
         result = await self._session.execute(query)
 
-        return [PlayerEntryRow(**entry) for entry in result.mappings()]  # pyright: ignore[reportAny]
+        return list(result.scalars().all())
 
 
 def get_player_repository(

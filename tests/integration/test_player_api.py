@@ -43,11 +43,12 @@ class TestPlayerEndpoints:
 
     async def test_get_player_success(self, client: AsyncClient):
         mock_repo = AsyncMock(spec=PlayerRepository)
-        player = Player(id=1, name="Alice")
+        player = Player(id=1, name="Alice", weight=12.75)
         mock_repo.get_by_name.return_value = player
-        mock_repo.get_player_entries.return_value = [
+        mock_repo.get_entries_for.return_value = [
             PlayerEntryRow(
                 leaderboard_name="Global",
+                player_name=player.name,
                 rank=1,
                 value=100,
                 estimated_time_per_completion_minutes=2,
@@ -61,6 +62,7 @@ class TestPlayerEndpoints:
             assert res.status_code == 200
             data = res.json()
             assert data["username"] == "Alice"
+            assert data["weight"] == 12.75
             assert data["totalCompletions"] == 100
             assert len(data["entries"]) == 1
             assert data["entries"][0]["leaderboardName"] == "Global"

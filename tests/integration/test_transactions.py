@@ -44,7 +44,7 @@ class TestBatchAtomicity:
             RuntimeError("DB error during 2nd leaderboard"),
         ]
         lb_repo.create_snapshot.return_value = snap1
-        player_repo.bulk_upsert_players.return_value = None
+        player_repo.upsert_many.return_value = None
 
         use_case = CreateSnapshot(
             uow=uow, redis=redis, lb_repo=lb_repo, player_repo=player_repo

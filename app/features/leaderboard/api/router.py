@@ -7,11 +7,15 @@ from app.features.leaderboard.dto.response import (
     LeaderboardsResponse,
     SnapshotCreatedResponse,
     SnapshotResponse,
+    WeightLeaderboardResponse,
 )
 from app.features.leaderboard.use_cases.create_snapshot import CreateSnapshot
 from app.features.leaderboard.use_cases.get_latest_snapshot import GetLatestSnapshot
 from app.features.leaderboard.use_cases.get_leaderboard_names import GetLeaderboards
 from app.core.constants import API_ROUTE_PREFIX, LIMITER_HTTP_GET, LIMITER_HTTP_POST
+from app.features.leaderboard.use_cases.get_weight_leaderboard import (
+    GetWeightLeaderboard,
+)
 
 leaderboard_router = APIRouter(
     prefix=f"{API_ROUTE_PREFIX}/leaderboards", tags=["leaderboards"]
@@ -23,6 +27,15 @@ leaderboard_router = APIRouter(
 async def get_leaderboards(
     request: Request, use_case: GetLeaderboards = Depends()
 ) -> LeaderboardsResponse:
+    return await use_case.execute()
+
+
+@leaderboard_router.get("/weight")
+@limiter.limit(LIMITER_HTTP_GET)
+async def get_weight_leaderboard(
+    request: Request,
+    use_case: GetWeightLeaderboard = Depends(),
+) -> WeightLeaderboardResponse:
     return await use_case.execute()
 
 
