@@ -79,7 +79,7 @@ class TestGetPlayerUseCase:
         redis = AsyncMock()
         redis.get = AsyncMock(return_value=None)
         redis.set = AsyncMock(return_value=True)
-        player = Player(id=1, name="Alice")
+        player = Player(id=1, name="Alice", weight=42.5)
         player_repo.get_by_name.return_value = player
         player_repo.get_entries_for.return_value = [
             PlayerEntryRow(
@@ -104,6 +104,7 @@ class TestGetPlayerUseCase:
         res = await use_case.execute("Alice")
 
         assert res.username == "Alice"
+        assert res.weight == 42.5
         assert res.total_completions == 75
         assert len(res.entries) == 2
         assert res.entries[0].leaderboard_name == "Global"
