@@ -68,21 +68,9 @@ class GetPlayer:
             entry.estimated_playtime_minutes for entry in entries
         )
 
-        weight = calculate_weight_for_rows(
-            [
-                EntryRow(
-                    entry.rank,
-                    entry.value,
-                    entry.estimated_time_per_completion_minutes,
-                    entry.group_size,
-                )
-                for entry in entry_rows
-            ]
-        )
-
         return PlayerResponse(
             username=player.name,
-            weight=weight,
+            weight=player.weight,
             totalCompletions=total_comps,
             totalPlaytimeMinutes=total_playtime_minutes,
             entries=entries,
