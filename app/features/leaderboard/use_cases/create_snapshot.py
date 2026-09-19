@@ -24,6 +24,27 @@ from app.features.player.repositories.postgres import (
 )
 
 
+def _dedupe_case_insensitive(names: set[str]) -> set[str]:
+    """Collapse names that differ only by case to a single representative.
+
+    Player uniqueness is enforced in the database by a functional unique index
+    on ``lower(name)`` (``idx_player_name_lower``). A single ``INSERT ...
+    VALUES`` statement cannot resolve a case-only collision *within itself* via
+    ``ON CONFLICT DO NOTHING``, so a batch containing both ``"Moagle"`` and
+    ``"moagle"`` would still raise ``UniqueViolationError``. Collapsing to one
+    representative per ``casefold()`` key keeps duplicate rows out of the
+    insert. The batch is a ``set``, so representative selection is
+    deterministic only up to iteration order, which is fine because duplicates
+    are semantically the same player.
+    """
+    by_casefold: dict[str, str] = {}
+    for name in names:
+        if name.casefold() not in by_casefold:
+            by_casefold[name.casefold()] = name
+
+    return set(by_casefold.values())
+
+
 class CreateSnapshot:
     def __init__(
         self,
@@ -48,7 +69,7 @@ class CreateSnapshot:
             unique_names.update(entry.player_name for entry in created_snapshot.entries)
 
         if unique_names:
-            await self._player_repo.upsert_many(unique_names)
+            await self._player_repo.upsert_many(_dedupe_case_insensitive(unique_names))
             await self._compute_weights(unique_names)
 
         await self._unit_of_work.commit()
@@ -99,10 +120,18 @@ class CreateSnapshot:
     async def _compute_weights(self, players: set[str]) -> None:
         rows = await self._player_repo.get_entries_for_many(players)
 
+        # Group by casefolded name: entry rows carry whatever casing the scraper
+        # submitted, which may differ between leaderboards for the same player.
+        # Grouping exhaustively would yield two keys differing only by case and
+        # the multi-row weight upsert would self-collide on `lower(name)`.
         player_entries_map: dict[str, list[EntryRow]] = defaultdict(list)
+        display_names: dict[str, str] = {}
 
         for row in rows:
-            player_entries_map[row.player_name].append(
+            key = row.player_name.casefold()
+            if key not in display_names:
+                display_names[key] = row.player_name
+            player_entries_map[key].append(
                 EntryRow(
                     row.rank,
                     row.value,
@@ -112,8 +141,8 @@ class CreateSnapshot:
             )
 
         player_weight_map = {
-            name: calculate_weight_for_rows(entries)
-            for name, entries in player_entries_map.items()
+            display_names[key]: calculate_weight_for_rows(entries)
+            for key, entries in player_entries_map.items()
         }
 
         await self._player_repo.update_weights_for_many(player_weight_map)

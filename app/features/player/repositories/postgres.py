@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from fastapi import Depends
-from sqlalchemy import func, select
+from sqlalchemy import ColumnElement, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,18 @@ from app.features.leaderboard.entities.orm import (
     LeaderboardSnapshot,
 )
 from app.features.player.entities.orm import Player
+
+
+def _player_name_lower_index() -> ColumnElement[str]:
+    """Expression uniquely indexed by ``idx_player_name_lower``.
+
+    Case-insensitive uniqueness on ``player.name`` is enforced by a functional
+    unique index on ``lower(name)`` (not the plain ``name`` column). Every
+    ``ON CONFLICT`` clause must therefore target this expression, otherwise
+    Postgres matches the conflict against a different constraint and the insert
+    raises ``UniqueViolationError`` for case-only-different names.
+    """
+    return func.lower(Player.name)
 
 
 @dataclass
@@ -108,7 +120,8 @@ class PlayerRepository:
             [{"name": name, "weight": weight} for name, weight in players.items()]
         )
         command = insert.on_conflict_do_update(
-            index_elements=["name"], set_={"weight": insert.excluded.weight}
+            index_elements=[_player_name_lower_index()],
+            set_={"weight": insert.excluded.weight},
         )
 
         _ = await self._session.execute(command)
@@ -122,7 +135,7 @@ class PlayerRepository:
         command = (
             pg_insert(Player)
             .values(name=player_name)
-            .on_conflict_do_nothing(index_elements=["name"])
+            .on_conflict_do_nothing(index_elements=[_player_name_lower_index()])
             .returning(Player)
         )
 
@@ -143,7 +156,7 @@ class PlayerRepository:
         command = (
             pg_insert(Player)
             .values([{"name": name} for name in player_names])
-            .on_conflict_do_nothing(index_elements=["name"])
+            .on_conflict_do_nothing(index_elements=[_player_name_lower_index()])
         )
 
         _ = await self._session.execute(command)

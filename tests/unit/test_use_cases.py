@@ -390,3 +390,189 @@ class TestCreateSnapshotWeightWritePath:
         assert weights["Alice"] == calculate_weight_for_rows(
             [EntryRow(1, 100, 30, 1), EntryRow(3, 40, 15, 4)]
         )
+
+    async def test_groups_case_variant_names_across_boards_into_single_weight(self):
+        """Mixed-case duplicates across boards must not produce two weight keys.
+
+        Entry rows carry the scraper's casing, which may differ per board for
+        the same player. Two keys differing only by case would make the
+        multi-row weight upsert self-collide on `lower(name)`.
+        """
+        uow = AsyncMock(spec=UnitOfWork)
+        redis = AsyncMock()
+        redis.delete = AsyncMock(return_value=True)
+        lb_repo = AsyncMock(spec=LeaderboardRepository)
+        player_repo = AsyncMock(spec=PlayerRepository)
+        now = datetime.now(UTC)
+
+        lb = Leaderboard(
+            id=1,
+            external_leaderboard_id="global-id",
+            name="Global",
+            estimated_time_per_completion_minutes=30,
+            group_size=1,
+            created_at=now,
+            updated_at=now,
+        )
+        created_snap = LeaderboardSnapshot(
+            id=42,
+            leaderboard_id=1,
+            fetched_at=now,
+            entries=[LeaderboardEntry(rank=1, player_name="Moagle", value=100)],
+        )
+
+        lb_repo.get_leaderboard_by_name.return_value = lb
+        lb_repo.create_snapshot.return_value = created_snap
+        player_repo.upsert_many.return_value = None
+        player_repo.get_entries_for_many.return_value = [
+            PlayerEntryRow(
+                leaderboard_name="Global",
+                player_name="Moagle",
+                rank=1,
+                value=100,
+                estimated_time_per_completion_minutes=30,
+                group_size=1,
+            ),
+            PlayerEntryRow(
+                leaderboard_name="Zenith",
+                player_name="moagle",
+                rank=3,
+                value=40,
+                estimated_time_per_completion_minutes=15,
+                group_size=4,
+            ),
+        ]
+
+        use_case = CreateSnapshot(
+            uow=uow, redis=redis, lb_repo=lb_repo, player_repo=player_repo
+        )
+        req = CreateSnapshotRequest(
+            snapshots=[
+                LeaderboardSnapshotIn(
+                    leaderboardName="Global",
+                    entries=[EntryIn(rank=1, playerName="Moagle", value=100)],
+                )
+            ]
+        )
+
+        await use_case.execute(req)
+
+        weights = player_repo.update_weights_for_many.await_args.args[0]
+
+        assert len(weights) == 1
+        assert weights["Moagle"] == calculate_weight_for_rows(
+            [EntryRow(1, 100, 30, 1), EntryRow(3, 40, 15, 4)]
+        )
+
+
+class TestCreateSnapshotCaseInsensitiveDedupe:
+    async def test_dedupes_names_that_differ_only_by_case(self):
+        """Case-only duplicates must collapse before upsert.
+
+        A single INSERT cannot resolve an intra-statement case collision via
+        ``ON CONFLICT DO NOTHING``, so the use case must collapse ``"Moagle"``
+        and ``"moagle"`` to one name before calling the repository. Otherwise
+        ``idx_player_name_lower`` raises ``UniqueViolationError``.
+        """
+        uow = AsyncMock(spec=UnitOfWork)
+        redis = AsyncMock()
+        redis.delete = AsyncMock(return_value=True)
+        lb_repo = AsyncMock(spec=LeaderboardRepository)
+        player_repo = AsyncMock(spec=PlayerRepository)
+        now = datetime.now(UTC)
+
+        lb = Leaderboard(
+            id=1,
+            external_leaderboard_id="global-id",
+            name="Global",
+            estimated_time_per_completion_minutes=30,
+            group_size=1,
+            created_at=now,
+            updated_at=now,
+        )
+        created_snap = LeaderboardSnapshot(
+            id=42,
+            leaderboard_id=1,
+            fetched_at=now,
+            entries=[
+                LeaderboardEntry(rank=1, player_name="Moagle", value=100),
+                LeaderboardEntry(rank=2, player_name="moagle", value=90),
+            ],
+        )
+
+        lb_repo.get_leaderboard_by_name.return_value = lb
+        lb_repo.create_snapshot.return_value = created_snap
+        player_repo.upsert_many.return_value = None
+        player_repo.get_entries_for_many.return_value = []
+
+        use_case = CreateSnapshot(
+            uow=uow, redis=redis, lb_repo=lb_repo, player_repo=player_repo
+        )
+        req = CreateSnapshotRequest(
+            snapshots=[
+                LeaderboardSnapshotIn(
+                    leaderboardName="Global",
+                    entries=[
+                        EntryIn(rank=1, playerName="Moagle", value=100),
+                        EntryIn(rank=2, playerName="moagle", value=90),
+                    ],
+                )
+            ]
+        )
+
+        await use_case.execute(req)
+
+        upserted = player_repo.upsert_many.await_args.args[0]
+        assert len(upserted) == 1
+        assert next(iter(upserted)).casefold() == "moagle"
+
+    async def test_distinct_names_are_all_upserted(self):
+        uow = AsyncMock(spec=UnitOfWork)
+        redis = AsyncMock()
+        redis.delete = AsyncMock(return_value=True)
+        lb_repo = AsyncMock(spec=LeaderboardRepository)
+        player_repo = AsyncMock(spec=PlayerRepository)
+        now = datetime.now(UTC)
+
+        lb = Leaderboard(
+            id=1,
+            external_leaderboard_id="global-id",
+            name="Global",
+            estimated_time_per_completion_minutes=30,
+            group_size=1,
+            created_at=now,
+            updated_at=now,
+        )
+        created_snap = LeaderboardSnapshot(
+            id=42,
+            leaderboard_id=1,
+            fetched_at=now,
+            entries=[
+                LeaderboardEntry(rank=1, player_name="Alice", value=100),
+                LeaderboardEntry(rank=2, player_name="Bob", value=90),
+            ],
+        )
+
+        lb_repo.get_leaderboard_by_name.return_value = lb
+        lb_repo.create_snapshot.return_value = created_snap
+        player_repo.upsert_many.return_value = None
+        player_repo.get_entries_for_many.return_value = []
+
+        use_case = CreateSnapshot(
+            uow=uow, redis=redis, lb_repo=lb_repo, player_repo=player_repo
+        )
+        req = CreateSnapshotRequest(
+            snapshots=[
+                LeaderboardSnapshotIn(
+                    leaderboardName="Global",
+                    entries=[
+                        EntryIn(rank=1, playerName="Alice", value=100),
+                        EntryIn(rank=2, playerName="Bob", value=90),
+                    ],
+                )
+            ]
+        )
+
+        await use_case.execute(req)
+
+        assert player_repo.upsert_many.await_args.args[0] == {"Alice", "Bob"}
