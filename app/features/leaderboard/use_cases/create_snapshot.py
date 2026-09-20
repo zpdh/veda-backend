@@ -25,18 +25,6 @@ from app.features.player.repositories.postgres import (
 
 
 def _dedupe_case_insensitive(names: set[str]) -> set[str]:
-    """Collapse names that differ only by case to a single representative.
-
-    Player uniqueness is enforced in the database by a functional unique index
-    on ``lower(name)`` (``idx_player_name_lower``). A single ``INSERT ...
-    VALUES`` statement cannot resolve a case-only collision *within itself* via
-    ``ON CONFLICT DO NOTHING``, so a batch containing both ``"Moagle"`` and
-    ``"moagle"`` would still raise ``UniqueViolationError``. Collapsing to one
-    representative per ``casefold()`` key keeps duplicate rows out of the
-    insert. The batch is a ``set``, so representative selection is
-    deterministic only up to iteration order, which is fine because duplicates
-    are semantically the same player.
-    """
     by_casefold: dict[str, str] = {}
     for name in names:
         if name.casefold() not in by_casefold:
@@ -120,10 +108,6 @@ class CreateSnapshot:
     async def _compute_weights(self, players: set[str]) -> None:
         rows = await self._player_repo.get_entries_for_many(players)
 
-        # Group by casefolded name: entry rows carry whatever casing the scraper
-        # submitted, which may differ between leaderboards for the same player.
-        # Grouping exhaustively would yield two keys differing only by case and
-        # the multi-row weight upsert would self-collide on `lower(name)`.
         player_entries_map: dict[str, list[EntryRow]] = defaultdict(list)
         display_names: dict[str, str] = {}
 

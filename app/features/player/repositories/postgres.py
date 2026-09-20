@@ -15,14 +15,6 @@ from app.features.player.entities.orm import Player
 
 
 def _player_name_lower_index() -> ColumnElement[str]:
-    """Expression uniquely indexed by ``idx_player_name_lower``.
-
-    Case-insensitive uniqueness on ``player.name`` is enforced by a functional
-    unique index on ``lower(name)`` (not the plain ``name`` column). Every
-    ``ON CONFLICT`` clause must therefore target this expression, otherwise
-    Postgres matches the conflict against a different constraint and the insert
-    raises ``UniqueViolationError`` for case-only-different names.
-    """
     return func.lower(Player.name)
 
 
